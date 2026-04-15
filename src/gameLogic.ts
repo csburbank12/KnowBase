@@ -126,6 +126,62 @@ export function initGameLogic() {
         { q: 'Next prime after 7?', a: '11', wrong: ['8', '9', '10'] },
         { q: 'What is -3 + 8?', a: '5', wrong: ['-5', '11', '-11'] }
       ]
+    },
+    history: {
+      name: '🏛️ World History', desc: 'Ancient civilizations to modern era', questions: [
+        { q: 'Who was the first President of the USA?', a: 'George Washington', wrong: ['Thomas Jefferson', 'Abraham Lincoln', 'John Adams'] },
+        { q: 'In what year did World War II end?', a: '1945', wrong: ['1918', '1939', '1955'] },
+        { q: 'Which civilization built the pyramids?', a: 'Ancient Egyptians', wrong: ['Romans', 'Greeks', 'Mayans'] },
+        { q: 'Who painted the Mona Lisa?', a: 'Leonardo da Vinci', wrong: ['Michelangelo', 'Vincent van Gogh', 'Pablo Picasso'] },
+        { q: 'What was the name of the ship that brought the Pilgrims?', a: 'Mayflower', wrong: ['Santa Maria', 'Beagle', 'Endeavour'] },
+        { q: 'Which empire was ruled by Julius Caesar?', a: 'Roman Empire', wrong: ['Ottoman Empire', 'British Empire', 'Mongol Empire'] },
+        { q: 'Who discovered penicillin?', a: 'Alexander Fleming', wrong: ['Marie Curie', 'Louis Pasteur', 'Isaac Newton'] },
+        { q: 'What wall fell in 1989?', a: 'Berlin Wall', wrong: ['Great Wall of China', 'Hadrian\'s Wall', 'Western Wall'] },
+        { q: 'Who wrote "Romeo and Juliet"?', a: 'William Shakespeare', wrong: ['Charles Dickens', 'Jane Austen', 'Mark Twain'] },
+        { q: 'What ancient city was destroyed by Mount Vesuvius?', a: 'Pompeii', wrong: ['Athens', 'Troy', 'Sparta'] }
+      ]
+    },
+    science: {
+      name: '🔬 General Science', desc: 'Biology, chemistry, physics', questions: [
+        { q: 'What is the chemical symbol for water?', a: 'H2O', wrong: ['CO2', 'O2', 'NaCl'] },
+        { q: 'What planet is known as the Red Planet?', a: 'Mars', wrong: ['Venus', 'Jupiter', 'Saturn'] },
+        { q: 'What is the hardest natural substance on Earth?', a: 'Diamond', wrong: ['Gold', 'Iron', 'Quartz'] },
+        { q: 'How many bones are in the adult human body?', a: '206', wrong: ['106', '306', '406'] },
+        { q: 'What gas do plants absorb from the atmosphere?', a: 'Carbon Dioxide', wrong: ['Oxygen', 'Nitrogen', 'Hydrogen'] },
+        { q: 'What is the center of an atom called?', a: 'Nucleus', wrong: ['Electron', 'Proton', 'Neutron'] },
+        { q: 'What force keeps us on the ground?', a: 'Gravity', wrong: ['Magnetism', 'Friction', 'Inertia'] },
+        { q: 'What is the largest organ in the human body?', a: 'Skin', wrong: ['Heart', 'Liver', 'Brain'] },
+        { q: 'What part of the plant conducts photosynthesis?', a: 'Leaf', wrong: ['Root', 'Stem', 'Flower'] },
+        { q: 'At what temperature does water boil (Celsius)?', a: '100°C', wrong: ['0°C', '50°C', '212°C'] }
+      ]
+    },
+    geography: {
+      name: '🌍 Geography', desc: 'Continents, countries, oceans', questions: [
+        { q: 'What is the largest continent?', a: 'Asia', wrong: ['Africa', 'North America', 'Europe'] },
+        { q: 'What is the longest river in the world?', a: 'Nile', wrong: ['Amazon', 'Yangtze', 'Mississippi'] },
+        { q: 'Which ocean is the largest?', a: 'Pacific Ocean', wrong: ['Atlantic Ocean', 'Indian Ocean', 'Arctic Ocean'] },
+        { q: 'What is the capital of Japan?', a: 'Tokyo', wrong: ['Beijing', 'Seoul', 'Bangkok'] },
+        { q: 'Which country has the most population?', a: 'India', wrong: ['China', 'USA', 'Indonesia'] },
+        { q: 'What is the smallest country in the world?', a: 'Vatican City', wrong: ['Monaco', 'San Marino', 'Liechtenstein'] },
+        { q: 'Mount Everest is located in which mountain range?', a: 'Himalayas', wrong: ['Andes', 'Alps', 'Rockies'] },
+        { q: 'What desert covers much of northern Africa?', a: 'Sahara', wrong: ['Gobi', 'Kalahari', 'Mojave'] },
+        { q: 'Which country is also a continent?', a: 'Australia', wrong: ['Russia', 'Canada', 'Brazil'] },
+        { q: 'What is the capital of France?', a: 'Paris', wrong: ['London', 'Rome', 'Berlin'] }
+      ]
+    },
+    coding: {
+      name: '💻 Coding Basics', desc: 'Programming concepts & web dev', questions: [
+        { q: 'What does HTML stand for?', a: 'HyperText Markup Language', wrong: ['HighText Machine Language', 'HyperLoop Machine Language', 'HyperText Markup Level'] },
+        { q: 'Which language is used for styling web pages?', a: 'CSS', wrong: ['HTML', 'JavaScript', 'Python'] },
+        { q: 'What symbol is used for single-line comments in JS?', a: '//', wrong: ['/*', '#', '<!--'] },
+        { q: 'What does API stand for?', a: 'Application Programming Interface', wrong: ['Applied Programming Interface', 'Application Process Integration', 'Automated Program Interface'] },
+        { q: 'Which is NOT a JavaScript data type?', a: 'Float', wrong: ['String', 'Boolean', 'Undefined'] },
+        { q: 'What keyword declares a constant variable in JS?', a: 'const', wrong: ['let', 'var', 'constant'] },
+        { q: 'What does CSS stand for?', a: 'Cascading Style Sheets', wrong: ['Computer Style Sheets', 'Creative Style System', 'Colorful Style Sheets'] },
+        { q: 'Which HTML tag is used for the largest heading?', a: '<h1>', wrong: ['<heading>', '<h6>', '<head>'] },
+        { q: 'What is the output of 2 + "2" in JS?', a: '"22"', wrong: ['4', 'NaN', 'Error'] },
+        { q: 'Which of these is a version control system?', a: 'Git', wrong: ['Node', 'React', 'Docker'] }
+      ]
     }
   };
 
@@ -300,13 +356,13 @@ export function initGameLogic() {
 
     G = {
       name: name, mode: mode,
-      gold: isBlitz ? 120 : 80, hp: diff.hp, maxHp: diff.hp, score: 0, wave: 0, streak: 0, bestStreak: 0,
+      gold: isBlitz ? 120 : 80, totalGoldEarned: isBlitz ? 120 : 80, hp: diff.hp, maxHp: diff.hp, score: 0, wave: 0, streak: 0, bestStreak: 0,
       qAns: 0, qOk: 0, xp: 0, level: 1, xpNeed: 100,
       towers: [], enemies: [], projs: [], particles: [], floats: [],
       shakeT: 0, shakeM: 0, selTower: null, waveOn: false, over: false, paused: false, qOpen: false,
       path: path, pathSet: pathSet, base: path[path.length - 1],
       lb: [], tid: 0, spawnQ: [], spawnT: 0, kills: 0, tBuilt: 0, pulse: 0, gameTime: 0,
-      qTrack: qTrack, missedThisRound: [], qtime: diff.qtime, spdMult: diff.spdMult, hpMult: diff.hpMult,
+      qTrack: qTrack, missedThisRound: [], qStats: [], qtime: diff.qtime, spdMult: diff.spdMult, hpMult: diff.hpMult,
       powerups: { freeze: 0, gold: 0, heal: 0, boost: 0, nuke: 0 },
       boostTimer: 0, freezeTimer: 0, slowmoTimer: 0,
       achievements: {}, donBonus: 0, endless: !!endless || isBlitz || isSurv, lastQTime: 0, hintShown: false,
@@ -398,6 +454,62 @@ export function initGameLogic() {
     G.towers.push({ id: G.tid, x: g.x, y: g.y, type: def.id, dmg: def.dmg, rng: def.rng, rate: def.rate, color: def.color, icon: def.icon, level: 1, splash: def.splash || 0, slow: !!def.slow, chain: def.chain || 0, poison: !!def.poison, sniper: !!def.sniper, fireAccum: 0, anim: 1.6, kills: 0, onFire: false, abilityCd: 0, buffs: {} });
     burst((g.x + .5) * cellW, (g.y + .5) * cellH, def.color, 18); sfxPlace();
     updateHUD();
+  }
+
+  function updateTowerPanel() {
+    const panel = document.getElementById('sel-tower-panel');
+    if (!panel) return;
+    if (!activeTower) {
+      panel.style.display = 'none';
+      return;
+    }
+    panel.style.display = 'block';
+    const info = document.getElementById('sel-t-info');
+    const upgBtn = document.getElementById('sel-t-upg') as HTMLButtonElement;
+    const abBtn = document.getElementById('sel-t-ab') as HTMLButtonElement;
+    const sellBtn = document.getElementById('sel-t-sell') as HTMLButtonElement;
+    
+    var def = TDEFS.find(d => d.id === activeTower.type);
+    if (!def) return;
+
+    if (info) {
+      info.innerHTML = `
+        <div class="font-bungee text-amber-400 text-lg">${def.icon} ${def.name} Lvl ${activeTower.level}</div>
+        <div class="text-xs text-slate-300 mt-1">DMG: ${activeTower.dmg} | RNG: ${activeTower.rng.toFixed(1)}</div>
+        <div class="text-xs text-slate-400 mt-1">Kills: ${activeTower.kills}</div>
+      `;
+    }
+
+    if (upgBtn) {
+      if (activeTower.level >= 4) {
+        upgBtn.textContent = 'MAX LEVEL';
+        upgBtn.disabled = true;
+      } else {
+        var cost = Math.floor(def.cost * (.6 + activeTower.level * .4));
+        upgBtn.textContent = `UPGRADE (${cost}💰)`;
+        upgBtn.disabled = G.gold < cost;
+      }
+    }
+
+    if (abBtn) {
+      if (def.ability) {
+        abBtn.style.display = 'block';
+        if (activeTower.abilityCd > 0) {
+          abBtn.textContent = `${def.ability.name} (${Math.ceil(activeTower.abilityCd)}s)`;
+          abBtn.disabled = true;
+        } else {
+          abBtn.textContent = `${def.ability.icon} ${def.ability.name}`;
+          abBtn.disabled = false;
+        }
+      } else {
+        abBtn.style.display = 'none';
+      }
+    }
+
+    if (sellBtn) {
+      var ref = Math.floor(def.cost * activeTower.level * .5);
+      sellBtn.textContent = `🪙 SELL (${ref}💰)`;
+    }
   }
 
   function doSellAt(g: any) {
@@ -597,16 +709,34 @@ export function initGameLogic() {
       var rate = t.rate;
       if (t.buffs && t.buffs.surge > 0) rate *= 0.5;
       if (t.fireAccum < rate) return; t.fireAccum = 0;
-      var tg = null, best = Infinity;
+      var tg = null, bestScore = -Infinity;
       G.enemies.forEach(function (e: any) { 
         if (e.hp <= 0) return; 
         if (e.flying && t.type === 'cannon') return; // Cannons can't hit flying enemies
         var pos = ePos(e), dx = pos.x / cellW - .5 - t.x, dy = pos.y / cellH - .5 - t.y, d = Math.sqrt(dx * dx + dy * dy); 
-        if (d <= t.rng) { if (d < best) { best = d; tg = e } } 
+        if (d <= t.rng) {
+          // Score calculation: higher is better
+          // Base score is negative distance (closer is better)
+          let score = -d;
+          
+          // Prioritize lower health enemies
+          if (t.splash > 0) {
+            // Splash towers heavily prioritize low health to finish off groups
+            score -= e.hp * 2;
+          } else {
+            // Normal towers also prioritize low health, but slightly less aggressively
+            score -= e.hp * 0.5;
+          }
+          
+          if (score > bestScore) { 
+            bestScore = score; 
+            tg = e; 
+          } 
+        } 
       });
       if (!tg) return; t.anim = 1.28;
       burst((t.x + .5) * cellW, (t.y + .5) * cellH, t.color, 4);
-      G.projs.push({ x: (t.x + .5) * cellW, y: (t.y + .5) * cellH, targetId: tg.id, spd: 500, dmg: t.dmg, color: t.color, trail: [], towerId: t.id });
+      G.projs.push({ x: (t.x + .5) * cellW, y: (t.y + .5) * cellH, targetId: tg.id, spd: 500, dmg: t.dmg, color: t.color, trail: [], towerId: t.id, isBigOne: t.isBigOne });
     });
   }
 
@@ -637,6 +767,7 @@ export function initGameLogic() {
     if (!t) {
       target.hp -= baseDmg;
       target.flash = .18;
+      addFloat(ePos(target).x, ePos(target).y - 10, baseDmg.toString(), '#fff');
       if (target.hp <= 0) killEnemy(target);
       return;
     }
@@ -652,6 +783,7 @@ export function initGameLogic() {
           if (e.armored) d = Math.max(1, Math.floor(d * 0.5));
           e.hp -= d;
           e.flash = .5;
+          addFloat(ep.x, ep.y - 10, d.toString(), '#f97316');
           if (e.hp <= 0) killEnemy(e);
         }
       });
@@ -670,12 +802,14 @@ export function initGameLogic() {
           if (e.armored) d = Math.max(1, Math.floor(d * 0.5));
           e.hp -= d;
           e.flash = .18;
+          addFloat(ep.x, ep.y - 10, d.toString(), '#fcd34d');
           if (e.hp <= 0) killEnemy(e);
         }
       });
     } else {
       target.hp -= baseDmg;
       target.flash = .18;
+      addFloat(ePos(target).x, ePos(target).y - 10, baseDmg.toString(), '#fff');
       if (target.hp <= 0) killEnemy(target);
     }
 
@@ -719,7 +853,7 @@ export function initGameLogic() {
   }
 
   function killEnemy(e: any) {
-    sfxKill(); G.gold += e.reward; G.score += e.reward * 5; G.kills++; addXP(e.boss ? 90 : 16);
+    sfxKill(); G.gold += e.reward; G.totalGoldEarned += e.reward; G.score += e.reward * 5; G.kills++; addXP(e.boss ? 90 : 16);
     var pos = ePos(e); 
     addFloat(pos.x, pos.y - 16, '+' + e.reward + '💰', '#fbbf24');
     burst(pos.x, pos.y, '#ef4444', 20); // Death explosion
@@ -730,7 +864,7 @@ export function initGameLogic() {
     G.xp += n;
     while (G.xp >= G.xpNeed) {
       G.xp -= G.xpNeed; G.level++; G.xpNeed = Math.floor(G.xpNeed * 1.45);
-      G.gold += 30; sfxLvl();
+      G.gold += 30; G.totalGoldEarned += 30; sfxLvl();
     }
   }
 
@@ -741,7 +875,7 @@ export function initGameLogic() {
       const wb = document.getElementById('wbtn') as HTMLButtonElement;
       if (wb) wb.disabled = false;
       if (G.wave >= MAXWAVES) { endGame(true); return }
-      G.gold += 20; G.score += 100; sfxWave();
+      G.gold += 20; G.totalGoldEarned += 20; G.score += 100; sfxWave();
       updateHUD();
     }
   }
@@ -750,14 +884,36 @@ export function initGameLogic() {
     if (!ctx) return;
     ctx.save();
     if (G.shakeT > 0) ctx.translate((Math.random() - .5) * G.shakeM * 2, (Math.random() - .5) * G.shakeM * 2);
-    ctx.fillStyle = '#04080f'; ctx.fillRect(0, 0, CW, CH);
-    ctx.strokeStyle = 'rgba(26,40,69,.22)'; ctx.lineWidth = 1;
+    
+    // Draw Grass Background
+    ctx.fillStyle = '#064e3b'; // Dark green grass
+    ctx.fillRect(0, 0, CW, CH);
+    
+    // Draw subtle grid
+    ctx.strokeStyle = 'rgba(255,255,255,0.05)'; 
+    ctx.lineWidth = 1;
     for (var gx = 0; gx <= COLS; gx++) { ctx.beginPath(); ctx.moveTo(gx * cellW, 0); ctx.lineTo(gx * cellW, CH); ctx.stroke() }
     for (var gy = 0; gy <= ROWS; gy++) { ctx.beginPath(); ctx.moveTo(0, gy * cellH); ctx.lineTo(CW, gy * cellH); ctx.stroke() }
+    
+    // Draw Path (Dirt/Stone)
     G.path.forEach(function (p: any, pi: number) {
       var pct = pi / G.path.length;
-      ctx.fillStyle = 'rgba(14,26,52,' + (.82 + pct * .14) + ')'; ctx.fillRect(p.x * cellW + 1, p.y * cellH + 1, cellW - 2, cellH - 2);
+      
+      // Base dirt
+      ctx.fillStyle = '#78350f'; 
+      ctx.fillRect(p.x * cellW, p.y * cellH, cellW, cellH);
+      
+      // Path texture/highlight
+      ctx.fillStyle = 'rgba(251,191,36,' + (0.1 + pct * 0.1) + ')'; 
+      ctx.fillRect(p.x * cellW + 2, p.y * cellH + 2, cellW - 4, cellH - 4);
     });
+
+    // Draw Castle Base
+    ctx.fillStyle = '#1e293b'; // Slate 800
+    ctx.fillRect(G.base.x * cellW, G.base.y * cellH, cellW, cellH);
+    ctx.fillStyle = '#334155'; // Slate 700
+    ctx.fillRect(G.base.x * cellW + 4, G.base.y * cellH + 4, cellW - 8, cellH - 8);
+
     G.towers.forEach(function (t: any) {
       var tx = (t.x + .5) * cellW, ty = (t.y + .5) * cellH;
       var sc = t.anim || 1;
@@ -869,12 +1025,74 @@ export function initGameLogic() {
       got.textContent = win ? '🏆 VICTORY!' : '💀 FORTRESS FALLEN';
       got.className = 'got ' + (win ? 'win' : 'lose');
     }
+    const stats = document.getElementById('go-stats');
+    if (stats) {
+      const acc = G.qAns > 0 ? Math.round((G.qOk / G.qAns) * 100) : 0;
+      stats.innerHTML = `
+        <div class="gs"><div class="gsv">${G.wave}</div><div class="gsl">WAVES</div></div>
+        <div class="gs"><div class="gsv">${G.kills}</div><div class="gsl">KILLS</div></div>
+        <div class="gs"><div class="gsv text-amber-400">${G.totalGoldEarned}</div><div class="gsl">GOLD EARNED</div></div>
+        <div class="gs"><div class="gsv text-cyan-400">${acc}%</div><div class="gsl">ACCURACY</div></div>
+        <div class="gs"><div class="gsv text-orange-400">${G.bestStreak}</div><div class="gsl">BEST STREAK</div></div>
+      `;
+    }
+
+    const review = document.getElementById('go-review');
+    if (review) {
+      if (G.qStats && G.qStats.length > 0) {
+        let html = '<div class="flex justify-between items-center mb-4"><h3 class="text-xl font-bungee text-cyan-400">📊 DETAILED REPORT</h3><button id="dl-csv-btn" class="bg-slate-800 hover:bg-slate-700 text-cyan-400 font-bungee text-[10px] py-1 px-3 rounded border border-cyan-800 transition-colors">📥 DOWNLOAD CSV</button></div>';
+        html += '<div class="overflow-x-auto"><table class="w-full text-left text-xs text-slate-300 border-collapse">';
+        html += '<thead><tr class="border-b border-slate-700 text-slate-500"><th class="p-2">Question</th><th class="p-2">Your Answer</th><th class="p-2">Correct</th><th class="p-2">Time (s)</th></tr></thead><tbody>';
+        
+        G.qStats.forEach((s: any) => {
+          const rowClass = s.isOk ? 'bg-emerald-900/20' : 'bg-red-900/20';
+          const icon = s.isOk ? '✅' : '❌';
+          html += `<tr class="border-b border-slate-800/50 ${rowClass}">
+            <td class="p-2 max-w-[200px] truncate" title="${s.q}">${s.q}</td>
+            <td class="p-2">${icon} ${s.given}</td>
+            <td class="p-2 text-emerald-400">${s.correct}</td>
+            <td class="p-2 font-mono">${s.time.toFixed(1)}s</td>
+          </tr>`;
+        });
+        
+        html += '</tbody></table></div>';
+        review.innerHTML = html;
+        review.style.display = 'block';
+
+        // Add CSV Download listener
+        setTimeout(() => {
+          const dlBtn = document.getElementById('dl-csv-btn');
+          if (dlBtn) {
+            dlBtn.addEventListener('click', () => {
+              let csv = 'Student Name,Question,Given Answer,Correct Answer,Is Correct,Time Taken (s)\n';
+              G.qStats.forEach((s: any) => {
+                csv += `"${G.name}","${s.q}","${s.given}","${s.correct}",${s.isOk},${s.time.toFixed(1)}\n`;
+              });
+              const blob = new Blob([csv], { type: 'text/csv' });
+              const url = window.URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.setAttribute('hidden', '');
+              a.setAttribute('href', url);
+              a.setAttribute('download', `KnowledgeFortress_Report_${G.name.replace(/[^a-z0-9]/gi, '_')}.csv`);
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
+            });
+          }
+        }, 100);
+
+      } else {
+        review.style.display = 'none';
+      }
+    }
   }
 
   function showScreen(id: string) {
     document.querySelectorAll('.screen').forEach(function (s) { s.classList.remove('active') });
     var el = document.getElementById(id); if (el) el.classList.add('active');
   }
+
+  let currentQStartTime = 0;
 
   // --- Question Handling ---
   function askQ() {
@@ -884,10 +1102,12 @@ export function initGameLogic() {
     const qres = document.getElementById('qres'); if (qres) { qres.textContent = ''; qres.className = 'qrs'; }
     const qtf = document.getElementById('qtf'); if (qtf) qtf.style.width = '100%';
 
+    currentQStartTime = Date.now();
+
     var grid = document.getElementById('agrid'); if (!grid) return; grid.innerHTML = '';
     ans.forEach(function (a, i) {
       var b = document.createElement('button'); b.className = 'ab'; b.textContent = lbl[i] + '. ' + a;
-      b.addEventListener('click', function () { handleAns(b, a === q.a, q, qi) });
+      b.addEventListener('click', function () { handleAns(b, a === q.a, q, qi, a) });
       grid!.appendChild(b)
     });
     const qov = document.getElementById('qov'); if (qov) qov.classList.add('active');
@@ -896,19 +1116,31 @@ export function initGameLogic() {
     qTimer = setInterval(function () {
       G.qTimeLeft -= .1;
       const qtf = document.getElementById('qtf'); if (qtf) qtf.style.width = Math.max(0, (G.qTimeLeft / G.qtime) * 100) + '%';
-      if (G.qTimeLeft <= 0) { clearInterval(qTimer); timeoutQ(qi) }
+      if (G.qTimeLeft <= 0) { clearInterval(qTimer); timeoutQ(qi, q) }
     }, 100);
   }
 
-  function handleAns(btn: HTMLButtonElement, ok: boolean, q: any, qi: number) {
+  function handleAns(btn: HTMLButtonElement, ok: boolean, q: any, qi: number, givenAns: string) {
     clearInterval(qTimer);
+    
+    const timeTaken = (Date.now() - currentQStartTime) / 1000;
+    G.qStats.push({
+      q: q.q,
+      given: givenAns,
+      correct: q.a,
+      isOk: ok,
+      time: timeTaken
+    });
+
     var allBtns = document.querySelectorAll('#agrid .ab');
     allBtns.forEach(function (b: any) { b.disabled = true; b.style.pointerEvents = 'none' });
     if (ok) {
-      G.streak++; G.qOk++; G.gold += 30; sfxOk(G.streak);
+      G.streak++; G.qOk++; G.gold += 30; G.totalGoldEarned += 30; sfxOk(G.streak);
+      if (G.streak > G.bestStreak) G.bestStreak = G.streak;
       const qres = document.getElementById('qres'); if (qres) { qres.className = 'qrs good'; qres.textContent = '✅ Correct! +30💰'; }
     } else {
       sfxNo(); G.streak = 0;
+      G.missedThisRound.push({ q: q.q, a: q.a });
       const qres = document.getElementById('qres'); if (qres) { qres.className = 'qrs bad'; qres.textContent = '❌ The answer was: ' + q.a; }
     }
     updateHUD();
@@ -918,8 +1150,19 @@ export function initGameLogic() {
     }, 1500);
   }
 
-  function timeoutQ(qi: number) {
+  function timeoutQ(qi: number, q: any) {
     G.streak = 0; sfxNo();
+    
+    const timeTaken = (Date.now() - currentQStartTime) / 1000;
+    G.qStats.push({
+      q: q.q,
+      given: 'TIMEOUT',
+      correct: q.a,
+      isOk: false,
+      time: timeTaken
+    });
+    G.missedThisRound.push({ q: q.q, a: q.a });
+
     const qres = document.getElementById('qres'); if (qres) { qres.className = 'qrs bad'; qres.textContent = "⏰ Time's up! Answer: " + questions[qi].a; }
     setTimeout(function () { document.getElementById('qov')?.classList.remove('active'); G.qOpen = false }, 1600);
   }
@@ -991,6 +1234,103 @@ export function initGameLogic() {
     G.spawnT = 0;
     updateHUD();
   }
+  (window as any).startCustomQuiz = () => {
+    const input = (document.getElementById('custom-quiz-input') as HTMLTextAreaElement).value;
+    if (!input || input.trim() === '') {
+      alert('Please enter some questions first!');
+      return;
+    }
+
+    const lines = input.split('\n');
+    const customQs: any[] = [];
+    
+    lines.forEach(line => {
+      if (line.trim() === '') return;
+      const parts = line.split('|').map(p => p.trim());
+      if (parts.length >= 5) {
+        customQs.push({
+          q: parts[0],
+          a: parts[1],
+          wrong: [parts[2], parts[3], parts[4]]
+        });
+      }
+    });
+
+    if (customQs.length === 0) {
+      alert('Could not parse any questions. Please check the format!');
+      return;
+    }
+
+    initGame('Player', customQs, false);
+  };
+
+  (window as any).generateShareLink = () => {
+    const input = (document.getElementById('custom-quiz-input') as HTMLTextAreaElement).value;
+    if (!input || input.trim() === '') {
+      alert('Please enter some questions first!');
+      return;
+    }
+
+    const lines = input.split('\n');
+    const customQs: any[] = [];
+    
+    lines.forEach(line => {
+      if (line.trim() === '') return;
+      const parts = line.split('|').map(p => p.trim());
+      if (parts.length >= 5) {
+        customQs.push({
+          q: parts[0],
+          a: parts[1],
+          wrong: [parts[2], parts[3], parts[4]]
+        });
+      }
+    });
+
+    if (customQs.length === 0) {
+      alert('Could not parse any questions. Please check the format!');
+      return;
+    }
+
+    const encoded = btoa(encodeURIComponent(JSON.stringify(customQs)));
+    const url = window.location.origin + window.location.pathname + '#quiz=' + encoded;
+    
+    navigator.clipboard.writeText(url).then(() => {
+      alert('Student Link copied to clipboard!\n\n' + url);
+    }).catch(err => {
+      prompt('Copy this link to share with students:', url);
+    });
+  };
+
+  let loadedCustomQuiz: any[] | null = null;
+
+  (window as any).startStudentQuiz = () => {
+    const nameInput = document.getElementById('student-name-input') as HTMLInputElement;
+    const name = nameInput.value.trim();
+    if (!name) {
+      alert('Please enter your name to begin!');
+      return;
+    }
+    if (loadedCustomQuiz && loadedCustomQuiz.length > 0) {
+      initGame(name, loadedCustomQuiz, false);
+    }
+  };
+
+  // Check URL Hash on load
+  setTimeout(() => {
+    if (window.location.hash && window.location.hash.startsWith('#quiz=')) {
+      try {
+        const encoded = window.location.hash.substring(6);
+        loadedCustomQuiz = JSON.parse(decodeURIComponent(atob(encoded)));
+        if (loadedCustomQuiz && loadedCustomQuiz.length > 0) {
+          showScreen('student-login');
+        }
+      } catch (e) {
+        console.error('Failed to parse custom quiz from URL', e);
+        window.location.hash = '';
+      }
+    }
+  }, 100);
+
   (window as any).askQ = askQ;
   (window as any).togglePause = () => {
     G.paused = !G.paused;
