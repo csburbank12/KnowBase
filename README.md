@@ -2,19 +2,18 @@
 <img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
 </div>
 
-# Run and deploy your AI Studio app
+# Knowledge Fortress
 
-This contains everything you need to run your app locally.
+Knowledge Fortress is an educational tower-defense game built with React + Vite.
+Players answer quiz questions to earn gold, place towers, and defend the castle through waves of enemies.
 
-View your app in AI Studio: https://ai.studio/apps/ec39d710-daf3-4ed1-b10d-abf95bfdeb1e
+## Run locally
 
-## Run Locally
-
-**Prerequisites:**  Node.js
-
+**Prerequisites:** Node.js 18+
 
 1. Install dependencies:
    `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
+2. Start the dev server:
    `npm run dev`
+3. Build for production:
+   `npm run build`
