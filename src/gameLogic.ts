@@ -239,6 +239,276 @@ export function initGameLogic() {
     return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
   }
 
+  const MAX_CUSTOM_QUESTIONS = 120;
+  const MAX_QUESTION_TEXT_LEN = 240;
+  const MAX_ANSWER_TEXT_LEN = 140;
+
+  function sanitizeQuizText(raw: any, maxLen: number) {
+    return String(raw || '')
+      .replace(/[\u0000-\u001F\u007F]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .slice(0, maxLen);
+  }
+
+  function parseCustomQuizInput(input: string) {
+    const lines = input.split('\n');
+    const customQs: any[] = [];
+    let badLines = 0;
+
+    lines.forEach(line => {
+      if (customQs.length >= MAX_CUSTOM_QUESTIONS) return;
+      if (line.trim() === '') return;
+      const parts = line.split('|').map(p => p.trim());
+      if (parts.length < 5) {
+        badLines++;
+        return;
+      }
+
+      const q = sanitizeQuizText(parts[0], MAX_QUESTION_TEXT_LEN);
+      const a = sanitizeQuizText(parts[1], MAX_ANSWER_TEXT_LEN);
+      const wrong = [
+        sanitizeQuizText(parts[2], MAX_ANSWER_TEXT_LEN),
+        sanitizeQuizText(parts[3], MAX_ANSWER_TEXT_LEN),
+        sanitizeQuizText(parts[4], MAX_ANSWER_TEXT_LEN)
+      ].filter(Boolean);
+
+      if (!q || !a || wrong.length < 3) {
+        badLines++;
+        return;
+      }
+
+      customQs.push({ q, a, wrong });
+    });
+
+    return { customQs, badLines };
+  }
+
+  function normalizeSharedQuizPayload(payload: any) {
+    if (!Array.isArray(payload)) return [];
+    return payload
+      .slice(0, MAX_CUSTOM_QUESTIONS)
+      .map((item: any) => ({
+        q: sanitizeQuizText(item?.q, MAX_QUESTION_TEXT_LEN),
+        a: sanitizeQuizText(item?.a, MAX_ANSWER_TEXT_LEN),
+        wrong: Array.isArray(item?.wrong)
+          ? item.wrong.slice(0, 3).map((w: any) => sanitizeQuizText(w, MAX_ANSWER_TEXT_LEN)).filter(Boolean)
+          : [],
+      }))
+      .filter((item: any) => item.q && item.a && item.wrong.length === 3);
+  }
+
+  function csvSafeCell(value: any) {
+    const text = String(value ?? '').replace(/"/g, '""');
+    return /^[=+\-@]/.test(text) ? `'${text}` : text;
+  }
+
+  const LEADERBOARD_KEY = 'kf_leaderboard_v1';
+  const LEADERBOARD_LIMIT = 15;
+
+  function getLeaderboard() {
+    try {
+      const raw = localStorage.getItem(LEADERBOARD_KEY);
+      const parsed = raw ? JSON.parse(raw) : [];
+      if (!Array.isArray(parsed)) return [];
+      return parsed
+        .filter((entry: any) => typeof entry?.score === 'number')
+        .sort((a: any, b: any) => b.score - a.score)
+        .slice(0, LEADERBOARD_LIMIT);
+    } catch {
+      return [];
+    }
+  }
+
+  function saveLeaderboard(entries: any[]) {
+    try {
+      localStorage.setItem(LEADERBOARD_KEY, JSON.stringify(entries.slice(0, LEADERBOARD_LIMIT)));
+    } catch {
+      // storage may be unavailable in private mode / locked environments
+    }
+  }
+
+  function renderLeaderboard() {
+    const list = document.getElementById('leaderboard-list');
+    if (!list) return;
+
+    const entries = getLeaderboard();
+    if (!entries.length) {
+      list.innerHTML = '<div class="text-xs text-slate-500">No runs yet — start a game to set your first score.</div>';
+      return;
+    }
+
+    list.innerHTML = entries.map((entry: any, i: number) => {
+      const medal = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i + 1}`;
+      const safeName = esc(entry.name || 'Player');
+      const safeMode = esc((entry.mode || 'classic').toUpperCase());
+      const accuracy = typeof entry.acc === 'number' ? `${entry.acc}%` : '—';
+      return `<div class="flex items-center justify-between bg-slate-800/60 border border-slate-700/50 rounded-lg px-2 py-1.5 text-xs">
+        <div class="min-w-0">
+          <div class="text-slate-200 truncate">${medal} ${safeName}</div>
+          <div class="text-slate-500">${safeMode} · W${entry.wave ?? 0} · ${accuracy} ACC</div>
+        </div>
+        <div class="font-bungee text-amber-400 ml-2">${entry.score ?? 0}</div>
+      </div>`;
+    }).join('');
+  }
+
+  function pushLeaderboardEntry(run: any) {
+    const entries = getLeaderboard();
+    entries.push(run);
+    saveLeaderboard(entries.sort((a: any, b: any) => b.score - a.score));
+    renderLeaderboard();
+  }
+
+  const PROFILE_KEY = 'kf_profile_v1';
+  const DEFAULT_PLAYER_NAME = 'Defender';
+
+  function getProfile() {
+    try {
+      const raw = localStorage.getItem(PROFILE_KEY);
+      const parsed = raw ? JSON.parse(raw) : null;
+      if (!parsed || typeof parsed !== 'object') throw new Error('invalid profile');
+      return {
+        name: sanitizeQuizText(parsed.name || DEFAULT_PLAYER_NAME, 24) || DEFAULT_PLAYER_NAME,
+        totalGames: Number(parsed.totalGames || 0),
+        totalWins: Number(parsed.totalWins || 0),
+        totalScore: Number(parsed.totalScore || 0),
+        bestScore: Number(parsed.bestScore || 0),
+        bestWave: Number(parsed.bestWave || 0),
+        createdAt: Number(parsed.createdAt || Date.now()),
+        lastPlayedAt: Number(parsed.lastPlayedAt || 0),
+      };
+    } catch {
+      return {
+        name: DEFAULT_PLAYER_NAME,
+        totalGames: 0,
+        totalWins: 0,
+        totalScore: 0,
+        bestScore: 0,
+        bestWave: 0,
+        createdAt: Date.now(),
+        lastPlayedAt: 0,
+      };
+    }
+  }
+
+  function saveProfile(profile: any) {
+    try {
+      localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
+    } catch {
+      // ignore storage write failures
+    }
+  }
+
+  function getPlayerName() {
+    const input = document.getElementById('player-name-input') as HTMLInputElement | null;
+    const fromInput = sanitizeQuizText(input?.value || '', 24);
+    if (fromInput) return fromInput;
+    return getProfile().name || DEFAULT_PLAYER_NAME;
+  }
+
+  function renderPlayerProfile() {
+    const profile = getProfile();
+    const hostInput = document.getElementById('player-name-input') as HTMLInputElement | null;
+    if (hostInput) hostInput.value = profile.name;
+
+    const stats = document.getElementById('player-profile-stats');
+    if (!stats) return;
+
+    const winRate = profile.totalGames > 0 ? Math.round((profile.totalWins / profile.totalGames) * 100) : 0;
+    stats.innerHTML = `
+      <div class="bg-slate-800/60 border border-slate-700/50 rounded-lg p-2"><div class="text-slate-500">Games</div><div class="text-cyan-300 font-bungee">${profile.totalGames}</div></div>
+      <div class="bg-slate-800/60 border border-slate-700/50 rounded-lg p-2"><div class="text-slate-500">Win Rate</div><div class="text-emerald-300 font-bungee">${winRate}%</div></div>
+      <div class="bg-slate-800/60 border border-slate-700/50 rounded-lg p-2"><div class="text-slate-500">Best Score</div><div class="text-amber-300 font-bungee">${profile.bestScore}</div></div>
+      <div class="bg-slate-800/60 border border-slate-700/50 rounded-lg p-2"><div class="text-slate-500">Best Wave</div><div class="text-orange-300 font-bungee">${profile.bestWave}</div></div>
+    `;
+  }
+
+  function updateProfileAfterRun(summary: any) {
+    const p = getProfile();
+    p.name = sanitizeQuizText(summary.name || p.name || DEFAULT_PLAYER_NAME, 24) || DEFAULT_PLAYER_NAME;
+    p.totalGames += 1;
+    if (summary.win) p.totalWins += 1;
+    p.totalScore += Number(summary.score || 0);
+    p.bestScore = Math.max(p.bestScore, Number(summary.score || 0));
+    p.bestWave = Math.max(p.bestWave, Number(summary.wave || 0));
+    p.lastPlayedAt = Date.now();
+    saveProfile(p);
+    renderPlayerProfile();
+  }
+
+  const ANALYTICS_KEY = 'kf_analytics_v1';
+  const ANALYTICS_LIMIT = 500;
+
+  function readAnalytics() {
+    try {
+      const raw = localStorage.getItem(ANALYTICS_KEY);
+      const parsed = raw ? JSON.parse(raw) : [];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function writeAnalytics(events: any[]) {
+    try {
+      localStorage.setItem(ANALYTICS_KEY, JSON.stringify(events.slice(-ANALYTICS_LIMIT)));
+    } catch {
+      // ignore storage failures
+    }
+  }
+
+  function trackEvent(name: string, payload: any = {}) {
+    const events = readAnalytics();
+    events.push({
+      event: name,
+      ts: Date.now(),
+      payload
+    });
+    writeAnalytics(events);
+  }
+
+  function exportAnalytics() {
+    const profile = getProfile();
+    const leaderboard = getLeaderboard();
+    const analytics = readAnalytics();
+    const report = {
+      app: 'Knowledge Fortress',
+      exportedAt: new Date().toISOString(),
+      profile,
+      leaderboard,
+      analytics
+    };
+    const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.setAttribute('hidden', '');
+    a.setAttribute('href', url);
+    a.setAttribute('download', `KnowledgeFortress_Data_${Date.now()}.json`);
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+  }
+
+  function clearAllProgress() {
+    saveProfile({
+      name: DEFAULT_PLAYER_NAME,
+      totalGames: 0,
+      totalWins: 0,
+      totalScore: 0,
+      bestScore: 0,
+      bestWave: 0,
+      createdAt: Date.now(),
+      lastPlayedAt: 0,
+    });
+    saveLeaderboard([]);
+    writeAnalytics([]);
+    renderPlayerProfile();
+    renderLeaderboard();
+    trackEvent('progress_reset');
+  }
+
   // --- Audio Engine ---
   function initAudio() { try { if (!audioCtx) audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)() } catch (e) { } }
   function pt(f: number, d: number, type?: string, v?: number, when?: number) {
@@ -392,6 +662,12 @@ export function initGameLogic() {
     updateCastleBar();
     const tutov = document.getElementById('tutov');
     if (tutov) tutov.classList.add('active');
+    trackEvent('game_started', {
+      player: sanitizeQuizText(name, 24),
+      mode,
+      difficulty: selectedDiff,
+      questionCount: questions.length
+    });
 
     gameLastT = 0;
     requestAnimationFrame(gameLoop);
@@ -1018,6 +1294,29 @@ export function initGameLogic() {
 
   function endGame(win: boolean) {
     G.over = true;
+    const acc = G.qAns > 0 ? Math.round((G.qOk / G.qAns) * 100) : 0;
+    pushLeaderboardEntry({
+      name: sanitizeQuizText(G.name || 'Player', 32),
+      score: Number(G.score || 0),
+      wave: Number(G.wave || 0),
+      acc,
+      mode: sanitizeQuizText(G.mode || 'classic', 16).toLowerCase(),
+      win: !!win,
+      at: Date.now()
+    });
+    updateProfileAfterRun({
+      name: G.name,
+      score: G.score,
+      wave: G.wave,
+      win
+    });
+    trackEvent('game_ended', {
+      win,
+      score: G.score,
+      wave: G.wave,
+      accuracy: acc,
+      mode: G.mode
+    });
     const goov = document.getElementById('goov');
     if (goov) goov.classList.add('active');
     const got = document.getElementById('got');
@@ -1027,7 +1326,6 @@ export function initGameLogic() {
     }
     const stats = document.getElementById('go-stats');
     if (stats) {
-      const acc = G.qAns > 0 ? Math.round((G.qOk / G.qAns) * 100) : 0;
       stats.innerHTML = `
         <div class="gs"><div class="gsv">${G.wave}</div><div class="gsl">WAVES</div></div>
         <div class="gs"><div class="gsv">${G.kills}</div><div class="gsl">KILLS</div></div>
@@ -1047,10 +1345,13 @@ export function initGameLogic() {
         G.qStats.forEach((s: any) => {
           const rowClass = s.isOk ? 'bg-emerald-900/20' : 'bg-red-900/20';
           const icon = s.isOk ? '✅' : '❌';
+          const safeQ = esc(s.q);
+          const safeGiven = esc(s.given);
+          const safeCorrect = esc(s.correct);
           html += `<tr class="border-b border-slate-800/50 ${rowClass}">
-            <td class="p-2 max-w-[200px] truncate" title="${s.q}">${s.q}</td>
-            <td class="p-2">${icon} ${s.given}</td>
-            <td class="p-2 text-emerald-400">${s.correct}</td>
+            <td class="p-2 max-w-[200px] truncate" title="${safeQ}">${safeQ}</td>
+            <td class="p-2">${icon} ${safeGiven}</td>
+            <td class="p-2 text-emerald-400">${safeCorrect}</td>
             <td class="p-2 font-mono">${s.time.toFixed(1)}s</td>
           </tr>`;
         });
@@ -1066,7 +1367,7 @@ export function initGameLogic() {
             dlBtn.addEventListener('click', () => {
               let csv = 'Student Name,Question,Given Answer,Correct Answer,Is Correct,Time Taken (s)\n';
               G.qStats.forEach((s: any) => {
-                csv += `"${G.name}","${s.q}","${s.given}","${s.correct}",${s.isOk},${s.time.toFixed(1)}\n`;
+                csv += `"${csvSafeCell(G.name)}","${csvSafeCell(s.q)}","${csvSafeCell(s.given)}","${csvSafeCell(s.correct)}",${s.isOk},${s.time.toFixed(1)}\n`;
               });
               const blob = new Blob([csv], { type: 'text/csv' });
               const url = window.URL.createObjectURL(blob);
@@ -1131,6 +1432,12 @@ export function initGameLogic() {
       isOk: ok,
       time: timeTaken
     });
+    trackEvent('question_answered', {
+      isCorrect: ok,
+      timeTaken: Number(timeTaken.toFixed(2)),
+      wave: G.wave,
+      streak: G.streak
+    });
 
     var allBtns = document.querySelectorAll('#agrid .ab');
     allBtns.forEach(function (b: any) { b.disabled = true; b.style.pointerEvents = 'none' });
@@ -1145,7 +1452,6 @@ export function initGameLogic() {
     }
     updateHUD();
     setTimeout(function () {
-      const qov = document.getElementById('qov'); if (qov) qov.classList.add('active');
       document.getElementById('qov')?.classList.remove('active'); G.qOpen = false
     }, 1500);
   }
@@ -1160,6 +1466,10 @@ export function initGameLogic() {
       correct: q.a,
       isOk: false,
       time: timeTaken
+    });
+    trackEvent('question_timeout', {
+      timeTaken: Number(timeTaken.toFixed(2)),
+      wave: G.wave
     });
     G.missedThisRound.push({ q: q.q, a: q.a });
 
@@ -1176,7 +1486,7 @@ export function initGameLogic() {
   };
   (window as any).showModeModal = (mode: string) => {
     pendingMode = mode;
-    initGame('Player', DEMO_QS, false, mode);
+    initGame(getPlayerName(), DEMO_QS, false, mode);
   };
   let waveAnnounceInterval: any = null;
 
@@ -1240,28 +1550,17 @@ export function initGameLogic() {
       alert('Please enter some questions first!');
       return;
     }
-
-    const lines = input.split('\n');
-    const customQs: any[] = [];
-    
-    lines.forEach(line => {
-      if (line.trim() === '') return;
-      const parts = line.split('|').map(p => p.trim());
-      if (parts.length >= 5) {
-        customQs.push({
-          q: parts[0],
-          a: parts[1],
-          wrong: [parts[2], parts[3], parts[4]]
-        });
-      }
-    });
+    const { customQs, badLines } = parseCustomQuizInput(input);
 
     if (customQs.length === 0) {
       alert('Could not parse any questions. Please check the format!');
       return;
     }
+    if (badLines > 0) {
+      toast(`Skipped ${badLines} invalid line${badLines > 1 ? 's' : ''}.`, 'bad');
+    }
 
-    initGame('Player', customQs, false);
+    initGame(getPlayerName(), customQs, false);
   };
 
   (window as any).generateShareLink = () => {
@@ -1270,33 +1569,23 @@ export function initGameLogic() {
       alert('Please enter some questions first!');
       return;
     }
-
-    const lines = input.split('\n');
-    const customQs: any[] = [];
-    
-    lines.forEach(line => {
-      if (line.trim() === '') return;
-      const parts = line.split('|').map(p => p.trim());
-      if (parts.length >= 5) {
-        customQs.push({
-          q: parts[0],
-          a: parts[1],
-          wrong: [parts[2], parts[3], parts[4]]
-        });
-      }
-    });
+    const { customQs, badLines } = parseCustomQuizInput(input);
 
     if (customQs.length === 0) {
       alert('Could not parse any questions. Please check the format!');
       return;
     }
+    if (badLines > 0) {
+      toast(`Skipped ${badLines} invalid line${badLines > 1 ? 's' : ''}.`, 'bad');
+    }
 
     const encoded = btoa(encodeURIComponent(JSON.stringify(customQs)));
     const url = window.location.origin + window.location.pathname + '#quiz=' + encoded;
+    trackEvent('share_link_generated', { questionCount: customQs.length });
     
     navigator.clipboard.writeText(url).then(() => {
       alert('Student Link copied to clipboard!\n\n' + url);
-    }).catch(err => {
+    }).catch(() => {
       prompt('Copy this link to share with students:', url);
     });
   };
@@ -1320,9 +1609,11 @@ export function initGameLogic() {
     if (window.location.hash && window.location.hash.startsWith('#quiz=')) {
       try {
         const encoded = window.location.hash.substring(6);
-        loadedCustomQuiz = JSON.parse(decodeURIComponent(atob(encoded)));
+        loadedCustomQuiz = normalizeSharedQuizPayload(JSON.parse(decodeURIComponent(atob(encoded))));
         if (loadedCustomQuiz && loadedCustomQuiz.length > 0) {
           showScreen('student-login');
+        } else {
+          throw new Error('No valid quiz questions found in payload');
         }
       } catch (e) {
         console.error('Failed to parse custom quiz from URL', e);
@@ -1435,6 +1726,33 @@ export function initGameLogic() {
   };
 
   // Initial UI setup
+  renderPlayerProfile();
+  renderLeaderboard();
+  (window as any).savePlayerName = () => {
+    const name = getPlayerName();
+    const p = getProfile();
+    p.name = name;
+    saveProfile(p);
+    renderPlayerProfile();
+    trackEvent('profile_saved', { name });
+    toast(`Saved as ${name}`, 'ok');
+  };
+  (window as any).clearLeaderboard = () => {
+    if (!confirm('Clear all local leaderboard entries?')) return;
+    saveLeaderboard([]);
+    renderLeaderboard();
+    trackEvent('leaderboard_cleared');
+    toast('Leaderboard cleared.', 'bad');
+  };
+  (window as any).exportAnalytics = () => {
+    exportAnalytics();
+    trackEvent('analytics_exported');
+  };
+  (window as any).clearAllProgress = () => {
+    if (!confirm('Reset profile, leaderboard, and analytics data on this device?')) return;
+    clearAllProgress();
+    toast('All local progress reset.', 'bad');
+  };
   buildPresets();
   function buildPresets() {
     var list = document.getElementById('preset-list'); if (!list) return; list.innerHTML = '';
@@ -1451,7 +1769,7 @@ export function initGameLogic() {
         </button>
       `;
       el.addEventListener('click', function () {
-        initGame('Player', bank.questions, false);
+        initGame(getPlayerName(), bank.questions, false);
       });
       list.appendChild(el);
     });

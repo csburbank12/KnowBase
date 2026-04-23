@@ -31,6 +31,43 @@ export default function App() {
             
             {/* Left Column */}
             <div className="flex flex-col gap-6">
+              {/* Player Profile */}
+              <div className="bg-slate-900/80 backdrop-blur-md border border-slate-700/50 rounded-2xl p-6 shadow-2xl">
+                <h2 className="font-bungee text-slate-400 tracking-widest text-sm mb-4">PLAYER PROFILE</h2>
+                <div className="flex gap-2 mb-3">
+                  <input
+                    id="player-name-input"
+                    type="text"
+                    maxLength={24}
+                    className="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200 focus:border-cyan-500 focus:outline-none"
+                    placeholder="Enter display name"
+                  />
+                  <button
+                    className="bg-cyan-900/50 hover:bg-cyan-800 text-cyan-300 border border-cyan-800 rounded-lg px-3 text-xs font-bungee transition-colors"
+                    onClick={() => (window as any).savePlayerName?.()}
+                  >
+                    SAVE
+                  </button>
+                </div>
+                <div id="player-profile-stats" className="grid grid-cols-2 gap-2 text-xs">
+                  {/* Populated by JS */}
+                </div>
+                <div className="flex gap-2 mt-3">
+                  <button
+                    className="flex-1 text-[10px] bg-slate-800 hover:bg-slate-700 text-cyan-400 border border-slate-700 rounded px-2 py-1"
+                    onClick={() => (window as any).exportAnalytics?.()}
+                  >
+                    EXPORT DATA
+                  </button>
+                  <button
+                    className="flex-1 text-[10px] bg-slate-800 hover:bg-slate-700 text-red-400 border border-slate-700 rounded px-2 py-1"
+                    onClick={() => (window as any).clearAllProgress?.()}
+                  >
+                    RESET ALL
+                  </button>
+                </div>
+              </div>
+
               {/* Difficulty */}
               <div className="bg-slate-900/80 backdrop-blur-md border border-slate-700/50 rounded-2xl p-6 shadow-2xl">
                 <h2 className="font-bungee text-slate-400 tracking-widest text-sm mb-4">1. SELECT DIFFICULTY</h2>
@@ -101,6 +138,21 @@ export default function App() {
                   <button className="flex-1 bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-bungee py-3 rounded-lg shadow-[0_0_15px_rgba(245,158,11,0.3)] transition-all text-xs" onClick={() => (window as any).startCustomQuiz()}>
                     PLAY NOW ➔
                   </button>
+                </div>
+              </div>
+
+              <div className="mt-4 pt-4 border-t border-slate-700/50">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="font-bungee text-slate-400 tracking-widest text-xs">TOP DEFENDERS</h3>
+                  <button
+                    className="text-[10px] text-slate-500 hover:text-red-400 transition-colors"
+                    onClick={() => (window as any).clearLeaderboard?.()}
+                  >
+                    CLEAR
+                  </button>
+                </div>
+                <div id="leaderboard-list" className="space-y-2 max-h-36 overflow-y-auto pr-1 custom-scrollbar">
+                  {/* Populated by JS */}
                 </div>
               </div>
             </div>
