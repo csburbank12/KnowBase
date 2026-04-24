@@ -77,11 +77,18 @@ export default function App() {
                 <button className="flex-1 bg-slate-800 text-cyan-400 font-bungee text-xs py-2 rounded border border-cyan-800 hover:bg-slate-700 transition-colors" onClick={() => {
                   document.getElementById('preset-list')!.style.display = 'block';
                   document.getElementById('custom-quiz-area')!.style.display = 'none';
+                  document.getElementById('ai-quiz-area')!.style.display = 'none';
                 }}>PRESETS</button>
                 <button className="flex-1 bg-slate-800 text-amber-400 font-bungee text-xs py-2 rounded border border-amber-800 hover:bg-slate-700 transition-colors" onClick={() => {
                   document.getElementById('preset-list')!.style.display = 'none';
                   document.getElementById('custom-quiz-area')!.style.display = 'block';
+                  document.getElementById('ai-quiz-area')!.style.display = 'none';
                 }}>CUSTOM</button>
+                <button className="flex-1 bg-slate-800 text-purple-400 font-bungee text-xs py-2 rounded border border-purple-800 hover:bg-slate-700 transition-colors" onClick={() => {
+                  document.getElementById('preset-list')!.style.display = 'none';
+                  document.getElementById('custom-quiz-area')!.style.display = 'none';
+                  document.getElementById('ai-quiz-area')!.style.display = 'flex';
+                }}>✨ AI</button>
               </div>
 
               <div id="preset-list" className="flex-1 overflow-y-auto pr-2 space-y-3 custom-scrollbar">
@@ -103,12 +110,82 @@ export default function App() {
                   </button>
                 </div>
               </div>
+
+              {/* AI Generate Panel */}
+              <div id="ai-quiz-area" className="flex-1 flex-col gap-3" style={{ display: 'none' }}>
+                <div className="bg-purple-950/30 border border-purple-800/40 rounded-xl p-3 text-xs text-purple-300 leading-relaxed">
+                  ✨ Generate quiz questions on <strong>any topic</strong> instantly using Google Gemini AI — no prep needed.
+                </div>
+                <div>
+                  <label className="block font-bungee text-slate-400 text-[10px] mb-1 tracking-widest">TOPIC</label>
+                  <input
+                    id="ai-topic-input"
+                    type="text"
+                    className="w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-sm text-slate-200 focus:border-purple-500 focus:outline-none"
+                    placeholder="e.g. Newton's Laws, The Civil War, Cell Biology…"
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <div className="flex-1">
+                    <label className="block font-bungee text-slate-400 text-[10px] mb-1 tracking-widest">GRADE LEVEL</label>
+                    <select id="ai-grade-select" className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-sm text-slate-200 focus:border-purple-500 focus:outline-none">
+                      <option>Elementary School</option>
+                      <option selected>Middle School</option>
+                      <option>High School</option>
+                      <option>College</option>
+                    </select>
+                  </div>
+                  <div className="w-20">
+                    <label className="block font-bungee text-slate-400 text-[10px] mb-1 tracking-widest">COUNT</label>
+                    <select id="ai-count-select" className="w-full bg-slate-950 border border-slate-700 rounded-lg p-2 text-sm text-slate-200 focus:border-purple-500 focus:outline-none">
+                      <option>5</option>
+                      <option selected>10</option>
+                      <option>15</option>
+                    </select>
+                  </div>
+                </div>
+                <button
+                  className="w-full bg-gradient-to-r from-purple-700 to-indigo-700 hover:from-purple-600 hover:to-indigo-600 text-white font-bungee py-3 rounded-lg shadow-[0_0_20px_rgba(168,85,247,0.3)] transition-all text-sm"
+                  onClick={() => (window as any).generateAIQuiz()}
+                >
+                  ✨ GENERATE QUESTIONS
+                </button>
+                <div id="ai-status" className="text-xs text-center min-h-[16px]"></div>
+                <div id="ai-preview" className="flex-1 overflow-y-auto space-y-1"></div>
+                <button
+                  id="ai-play-btn"
+                  className="w-full bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-bungee py-3 rounded-lg shadow-[0_0_15px_rgba(245,158,11,0.3)] transition-all text-sm"
+                  style={{ display: 'none' }}
+                  onClick={() => (window as any).playAIQuiz()}
+                >
+                  PLAY NOW ➔
+                </button>
+              </div>
             </div>
 
           </div>
 
-          <div className="mt-12 text-slate-600 text-xs font-mono tracking-widest uppercase">
-            Knowledge Fortress v6 · Ported to React
+          {/* Feature highlights */}
+          <div className="grid grid-cols-3 gap-4 w-full max-w-5xl mt-10 animate-in fade-in duration-1000 delay-300 fill-mode-both">
+            <div className="text-center px-4 py-3 rounded-xl bg-slate-900/50 border border-slate-800">
+              <div className="text-2xl mb-1">✨</div>
+              <div className="font-bungee text-purple-400 text-xs mb-1">AI-GENERATED</div>
+              <div className="text-slate-500 text-xs">Create quizzes on any topic in seconds with Google Gemini</div>
+            </div>
+            <div className="text-center px-4 py-3 rounded-xl bg-slate-900/50 border border-slate-800">
+              <div className="text-2xl mb-1">💡</div>
+              <div className="font-bungee text-cyan-400 text-xs mb-1">LEARN AS YOU PLAY</div>
+              <div className="text-slate-500 text-xs">Instant explanations after every answer reinforce real understanding</div>
+            </div>
+            <div className="text-center px-4 py-3 rounded-xl bg-slate-900/50 border border-slate-800">
+              <div className="text-2xl mb-1">🔗</div>
+              <div className="font-bungee text-amber-400 text-xs mb-1">SHARE INSTANTLY</div>
+              <div className="text-slate-500 text-xs">Send a link — students play right in the browser, no accounts needed</div>
+            </div>
+          </div>
+
+          <div className="mt-6 text-slate-600 text-xs font-mono tracking-widest uppercase">
+            Knowledge Fortress v7 · AI-Powered Edition
           </div>
         </div>
       </div>

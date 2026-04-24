@@ -3,6 +3,8 @@
  * Ported from vanilla JS to TypeScript module
  */
 
+import { GoogleGenAI } from '@google/genai';
+
 export function initGameLogic() {
   // --- Constants & Data ---
   const COLS = 18;
@@ -97,90 +99,90 @@ export function initGameLogic() {
   const QBANKS: any = {
     energy: {
       name: '⚡ Energy & Environment', desc: 'Renewable energy & climate', questions: [
-        { q: 'Primary source of energy for Earth?', a: 'The Sun', wrong: ['Wind', 'Water', 'Coal'] },
-        { q: 'What does a wind turbine convert wind into?', a: 'Electricity', wrong: ['Heat', 'Light', 'Sound'] },
-        { q: 'Unit of measurement for energy?', a: 'Joule', wrong: ['Watt', 'Volt', 'Ampere'] },
-        { q: 'Solar panels convert sunlight into?', a: 'Electricity', wrong: ['Heat only', 'Sound', 'Wind'] },
-        { q: 'What type of energy does a moving car have?', a: 'Kinetic energy', wrong: ['Potential', 'Chemical', 'Sound'] },
-        { q: 'Which is a renewable energy source?', a: 'Solar power', wrong: ['Coal', 'Natural gas', 'Oil'] },
-        { q: 'Main greenhouse gas from fossil fuels?', a: 'Carbon dioxide', wrong: ['Oxygen', 'Nitrogen', 'Helium'] },
-        { q: 'Which energy creates the most air pollution?', a: 'Coal', wrong: ['Solar', 'Wind', 'Hydro'] },
-        { q: 'Hydroelectric power uses what?', a: 'Flowing water', wrong: ['Hot steam', 'Wind', 'Sunlight'] },
-        { q: 'What layer traps heat in Earth\'s atmosphere?', a: 'Greenhouse gas layer', wrong: ['Ozone layer', 'Stratosphere', 'Ionosphere'] },
-        { q: 'What type of energy is stored in food?', a: 'Chemical energy', wrong: ['Kinetic', 'Nuclear', 'Solar'] },
-        { q: 'A stretched rubber band stores what energy?', a: 'Elastic potential energy', wrong: ['Kinetic', 'Thermal', 'Sound'] }
+        { q: 'Primary source of energy for Earth?', a: 'The Sun', wrong: ['Wind', 'Water', 'Coal'], explain: 'The Sun provides nearly all of Earth\'s energy through light and heat; even wind and water power ultimately trace back to solar energy.' },
+        { q: 'What does a wind turbine convert wind into?', a: 'Electricity', wrong: ['Heat', 'Light', 'Sound'], explain: 'Wind turbines use spinning blades to turn a generator, converting the kinetic energy of moving air directly into electrical energy.' },
+        { q: 'Unit of measurement for energy?', a: 'Joule', wrong: ['Watt', 'Volt', 'Ampere'], explain: 'The Joule (J) is the SI unit of energy; a Watt measures power (energy per second), not energy itself.' },
+        { q: 'Solar panels convert sunlight into?', a: 'Electricity', wrong: ['Heat only', 'Sound', 'Wind'], explain: 'Photovoltaic solar panels use the photoelectric effect — photons knock electrons free in silicon cells, generating an electric current.' },
+        { q: 'What type of energy does a moving car have?', a: 'Kinetic energy', wrong: ['Potential', 'Chemical', 'Sound'], explain: 'Kinetic energy is the energy of motion; any moving object has it, and it increases with both mass and speed.' },
+        { q: 'Which is a renewable energy source?', a: 'Solar power', wrong: ['Coal', 'Natural gas', 'Oil'], explain: 'Solar power is renewable because the Sun continuously radiates energy; coal, oil, and gas are finite fossil fuels that take millions of years to form.' },
+        { q: 'Main greenhouse gas from fossil fuels?', a: 'Carbon dioxide', wrong: ['Oxygen', 'Nitrogen', 'Helium'], explain: 'Burning fossil fuels releases CO₂ stored over millions of years; this extra CO₂ traps more heat in the atmosphere, driving climate change.' },
+        { q: 'Which energy creates the most air pollution?', a: 'Coal', wrong: ['Solar', 'Wind', 'Hydro'], explain: 'Coal combustion releases CO₂, sulfur dioxide, nitrogen oxides, and particulates; solar, wind, and hydro produce zero emissions during operation.' },
+        { q: 'Hydroelectric power uses what?', a: 'Flowing water', wrong: ['Hot steam', 'Wind', 'Sunlight'], explain: 'Hydroelectric plants capture the potential energy of water held at height; as it flows down through turbines, that energy becomes electricity.' },
+        { q: 'What layer traps heat in Earth\'s atmosphere?', a: 'Greenhouse gas layer', wrong: ['Ozone layer', 'Stratosphere', 'Ionosphere'], explain: 'Greenhouse gases like CO₂ and water vapor absorb outgoing infrared radiation and re-emit it, warming the surface — the greenhouse effect.' },
+        { q: 'What type of energy is stored in food?', a: 'Chemical energy', wrong: ['Kinetic', 'Nuclear', 'Solar'], explain: 'Food stores energy in chemical bonds within molecules like glucose; your cells release this energy through cellular respiration.' },
+        { q: 'A stretched rubber band stores what energy?', a: 'Elastic potential energy', wrong: ['Kinetic', 'Thermal', 'Sound'], explain: 'Elastic potential energy is stored when an elastic material is deformed; it converts to kinetic energy when released.' }
       ]
     },
     math: {
       name: '➕ Math Essentials', desc: 'Arithmetic, algebra, geometry', questions: [
-        { q: 'What is 7 × 8?', a: '56', wrong: ['48', '54', '63'] },
-        { q: 'What is 15% of 200?', a: '30', wrong: ['15', '25', '35'] },
-        { q: 'Simplify: 3/6', a: '1/2', wrong: ['1/3', '2/3', '3/4'] },
-        { q: 'Square root of 144?', a: '12', wrong: ['11', '13', '14'] },
-        { q: 'Solve: x + 5 = 12', a: 'x = 7', wrong: ['x = 5', 'x = 6', 'x = 17'] },
-        { q: 'What is 2³?', a: '8', wrong: ['6', '9', '12'] },
-        { q: 'Area of a 5×9 rectangle?', a: '45 sq units', wrong: ['14 sq units', '28 sq units', '36 sq units'] },
-        { q: 'What percent is 3 out of 12?', a: '25%', wrong: ['30%', '33%', '40%'] },
-        { q: '0.75 as a fraction?', a: '3/4', wrong: ['1/4', '2/3', '4/5'] },
-        { q: 'Perimeter of a square with side 6?', a: '24', wrong: ['12', '18', '36'] },
-        { q: 'Next prime after 7?', a: '11', wrong: ['8', '9', '10'] },
-        { q: 'What is -3 + 8?', a: '5', wrong: ['-5', '11', '-11'] }
+        { q: 'What is 7 × 8?', a: '56', wrong: ['48', '54', '63'], explain: '7 × 8 = 56; a handy trick is 7 × 8 = 7 × (4 × 2) = 28 × 2 = 56.' },
+        { q: 'What is 15% of 200?', a: '30', wrong: ['15', '25', '35'], explain: '15% of 200 = 0.15 × 200 = 30; or find 10% (= 20) then add half of that (10), giving 30.' },
+        { q: 'Simplify: 3/6', a: '1/2', wrong: ['1/3', '2/3', '3/4'], explain: 'Divide numerator and denominator by their GCD (3): 3 ÷ 3 = 1 and 6 ÷ 3 = 2, so 3/6 = 1/2.' },
+        { q: 'Square root of 144?', a: '12', wrong: ['11', '13', '14'], explain: '12 × 12 = 144, so √144 = 12; 144 is a perfect square.' },
+        { q: 'Solve: x + 5 = 12', a: 'x = 7', wrong: ['x = 5', 'x = 6', 'x = 17'], explain: 'Subtract 5 from both sides: x = 12 − 5 = 7.' },
+        { q: 'What is 2³?', a: '8', wrong: ['6', '9', '12'], explain: '2³ means 2 × 2 × 2 = 4 × 2 = 8; the exponent tells you how many times to multiply the base by itself.' },
+        { q: 'Area of a 5×9 rectangle?', a: '45 sq units', wrong: ['14 sq units', '28 sq units', '36 sq units'], explain: 'Area = length × width = 5 × 9 = 45 square units; perimeter would be 2(5 + 9) = 28.' },
+        { q: 'What percent is 3 out of 12?', a: '25%', wrong: ['30%', '33%', '40%'], explain: '(3 ÷ 12) × 100 = 0.25 × 100 = 25%; 3 is one quarter of 12.' },
+        { q: '0.75 as a fraction?', a: '3/4', wrong: ['1/4', '2/3', '4/5'], explain: '0.75 = 75/100; simplify by dividing by 25 to get 3/4.' },
+        { q: 'Perimeter of a square with side 6?', a: '24', wrong: ['12', '18', '36'], explain: 'A square has 4 equal sides: P = 4 × 6 = 24; area would be 6² = 36.' },
+        { q: 'Next prime after 7?', a: '11', wrong: ['8', '9', '10'], explain: '8 = 2³, 9 = 3², 10 = 2×5 are all composite; 11 has no divisors except 1 and itself, making it prime.' },
+        { q: 'What is -3 + 8?', a: '5', wrong: ['-5', '11', '-11'], explain: 'Start at -3 and add 8; moving 8 steps right on a number line lands on 5.' }
       ]
     },
     history: {
       name: '🏛️ World History', desc: 'Ancient civilizations to modern era', questions: [
-        { q: 'Who was the first President of the USA?', a: 'George Washington', wrong: ['Thomas Jefferson', 'Abraham Lincoln', 'John Adams'] },
-        { q: 'In what year did World War II end?', a: '1945', wrong: ['1918', '1939', '1955'] },
-        { q: 'Which civilization built the pyramids?', a: 'Ancient Egyptians', wrong: ['Romans', 'Greeks', 'Mayans'] },
-        { q: 'Who painted the Mona Lisa?', a: 'Leonardo da Vinci', wrong: ['Michelangelo', 'Vincent van Gogh', 'Pablo Picasso'] },
-        { q: 'What was the name of the ship that brought the Pilgrims?', a: 'Mayflower', wrong: ['Santa Maria', 'Beagle', 'Endeavour'] },
-        { q: 'Which empire was ruled by Julius Caesar?', a: 'Roman Empire', wrong: ['Ottoman Empire', 'British Empire', 'Mongol Empire'] },
-        { q: 'Who discovered penicillin?', a: 'Alexander Fleming', wrong: ['Marie Curie', 'Louis Pasteur', 'Isaac Newton'] },
-        { q: 'What wall fell in 1989?', a: 'Berlin Wall', wrong: ['Great Wall of China', 'Hadrian\'s Wall', 'Western Wall'] },
-        { q: 'Who wrote "Romeo and Juliet"?', a: 'William Shakespeare', wrong: ['Charles Dickens', 'Jane Austen', 'Mark Twain'] },
-        { q: 'What ancient city was destroyed by Mount Vesuvius?', a: 'Pompeii', wrong: ['Athens', 'Troy', 'Sparta'] }
+        { q: 'Who was the first President of the USA?', a: 'George Washington', wrong: ['Thomas Jefferson', 'Abraham Lincoln', 'John Adams'], explain: 'George Washington served as the first US President (1789–1797); he was unanimously elected by the Electoral College both terms.' },
+        { q: 'In what year did World War II end?', a: '1945', wrong: ['1918', '1939', '1955'], explain: 'WWII ended in 1945: Germany surrendered in May (V-E Day) and Japan in September (V-J Day) after atomic bombs were dropped on Hiroshima and Nagasaki.' },
+        { q: 'Which civilization built the pyramids?', a: 'Ancient Egyptians', wrong: ['Romans', 'Greeks', 'Mayans'], explain: 'The Great Pyramid of Giza was built around 2560 BCE by the Ancient Egyptians as tombs for pharaohs, using tens of thousands of workers.' },
+        { q: 'Who painted the Mona Lisa?', a: 'Leonardo da Vinci', wrong: ['Michelangelo', 'Vincent van Gogh', 'Pablo Picasso'], explain: 'Leonardo da Vinci painted the Mona Lisa between 1503–1519; the subject is believed to be Lisa Gherardini, wife of a Florentine merchant.' },
+        { q: 'What was the name of the ship that brought the Pilgrims?', a: 'Mayflower', wrong: ['Santa Maria', 'Beagle', 'Endeavour'], explain: 'The Mayflower carried 102 Pilgrims from England to Plymouth, Massachusetts in 1620, where they signed the Mayflower Compact.' },
+        { q: 'Which empire was ruled by Julius Caesar?', a: 'Roman Empire', wrong: ['Ottoman Empire', 'British Empire', 'Mongol Empire'], explain: 'Julius Caesar was a Roman general and dictator; he was assassinated in 44 BCE, and his adopted son Augustus became the first Roman Emperor.' },
+        { q: 'Who discovered penicillin?', a: 'Alexander Fleming', wrong: ['Marie Curie', 'Louis Pasteur', 'Isaac Newton'], explain: 'Alexander Fleming discovered penicillin in 1928 when he noticed mold killing bacteria in a petri dish, revolutionizing medicine.' },
+        { q: 'What wall fell in 1989?', a: 'Berlin Wall', wrong: ['Great Wall of China', 'Hadrian\'s Wall', 'Western Wall'], explain: 'The Berlin Wall divided East and West Berlin from 1961–1989; its fall symbolized the end of the Cold War and German reunification followed in 1990.' },
+        { q: 'Who wrote "Romeo and Juliet"?', a: 'William Shakespeare', wrong: ['Charles Dickens', 'Jane Austen', 'Mark Twain'], explain: 'Shakespeare wrote Romeo and Juliet around 1594–1596; it\'s one of the most performed plays in history and a foundational work of English literature.' },
+        { q: 'What ancient city was destroyed by Mount Vesuvius?', a: 'Pompeii', wrong: ['Athens', 'Troy', 'Sparta'], explain: 'Mount Vesuvius erupted in 79 CE, burying Pompeii in volcanic ash; the preserved city was rediscovered in the 18th century and is now a UNESCO site.' }
       ]
     },
     science: {
       name: '🔬 General Science', desc: 'Biology, chemistry, physics', questions: [
-        { q: 'What is the chemical symbol for water?', a: 'H2O', wrong: ['CO2', 'O2', 'NaCl'] },
-        { q: 'What planet is known as the Red Planet?', a: 'Mars', wrong: ['Venus', 'Jupiter', 'Saturn'] },
-        { q: 'What is the hardest natural substance on Earth?', a: 'Diamond', wrong: ['Gold', 'Iron', 'Quartz'] },
-        { q: 'How many bones are in the adult human body?', a: '206', wrong: ['106', '306', '406'] },
-        { q: 'What gas do plants absorb from the atmosphere?', a: 'Carbon Dioxide', wrong: ['Oxygen', 'Nitrogen', 'Hydrogen'] },
-        { q: 'What is the center of an atom called?', a: 'Nucleus', wrong: ['Electron', 'Proton', 'Neutron'] },
-        { q: 'What force keeps us on the ground?', a: 'Gravity', wrong: ['Magnetism', 'Friction', 'Inertia'] },
-        { q: 'What is the largest organ in the human body?', a: 'Skin', wrong: ['Heart', 'Liver', 'Brain'] },
-        { q: 'What part of the plant conducts photosynthesis?', a: 'Leaf', wrong: ['Root', 'Stem', 'Flower'] },
-        { q: 'At what temperature does water boil (Celsius)?', a: '100°C', wrong: ['0°C', '50°C', '212°C'] }
+        { q: 'What is the chemical symbol for water?', a: 'H2O', wrong: ['CO2', 'O2', 'NaCl'], explain: 'Water is H₂O — two hydrogen atoms bonded to one oxygen atom; this bent molecular shape gives water its unique properties like surface tension.' },
+        { q: 'What planet is known as the Red Planet?', a: 'Mars', wrong: ['Venus', 'Jupiter', 'Saturn'], explain: 'Mars appears red because its surface is rich in iron oxide (rust); it has the largest volcano in the solar system, Olympus Mons.' },
+        { q: 'What is the hardest natural substance on Earth?', a: 'Diamond', wrong: ['Gold', 'Iron', 'Quartz'], explain: 'Diamond scores 10 on the Mohs hardness scale; it\'s made of carbon atoms in a crystal lattice — the same element as graphite, just structured differently.' },
+        { q: 'How many bones are in the adult human body?', a: '206', wrong: ['106', '306', '406'], explain: 'Adults have 206 bones; babies are born with ~270 and many fuse together as they grow, especially in the skull and spine.' },
+        { q: 'What gas do plants absorb from the atmosphere?', a: 'Carbon Dioxide', wrong: ['Oxygen', 'Nitrogen', 'Hydrogen'], explain: 'Plants absorb CO₂ during photosynthesis and use sunlight to convert it and water into glucose and oxygen — the reverse of what animals do.' },
+        { q: 'What is the center of an atom called?', a: 'Nucleus', wrong: ['Electron', 'Proton', 'Neutron'], explain: 'The nucleus contains protons and neutrons packed tightly together; electrons orbit the nucleus in energy levels (shells) at much greater distances.' },
+        { q: 'What force keeps us on the ground?', a: 'Gravity', wrong: ['Magnetism', 'Friction', 'Inertia'], explain: 'Gravity is an attractive force between masses; Earth\'s mass pulls everything toward its center with an acceleration of ~9.8 m/s².' },
+        { q: 'What is the largest organ in the human body?', a: 'Skin', wrong: ['Heart', 'Liver', 'Brain'], explain: 'Skin covers the entire body and averages 2 square meters in adults; it regulates temperature, prevents infection, and senses touch.' },
+        { q: 'What part of the plant conducts photosynthesis?', a: 'Leaf', wrong: ['Root', 'Stem', 'Flower'], explain: 'Leaves contain chloroplasts filled with chlorophyll — the green pigment that captures sunlight to power photosynthesis.' },
+        { q: 'At what temperature does water boil (Celsius)?', a: '100°C', wrong: ['0°C', '50°C', '212°C'], explain: 'Water boils at 100°C (212°F) at sea level; at higher altitudes where pressure is lower, it boils at a lower temperature.' }
       ]
     },
     geography: {
       name: '🌍 Geography', desc: 'Continents, countries, oceans', questions: [
-        { q: 'What is the largest continent?', a: 'Asia', wrong: ['Africa', 'North America', 'Europe'] },
-        { q: 'What is the longest river in the world?', a: 'Nile', wrong: ['Amazon', 'Yangtze', 'Mississippi'] },
-        { q: 'Which ocean is the largest?', a: 'Pacific Ocean', wrong: ['Atlantic Ocean', 'Indian Ocean', 'Arctic Ocean'] },
-        { q: 'What is the capital of Japan?', a: 'Tokyo', wrong: ['Beijing', 'Seoul', 'Bangkok'] },
-        { q: 'Which country has the most population?', a: 'India', wrong: ['China', 'USA', 'Indonesia'] },
-        { q: 'What is the smallest country in the world?', a: 'Vatican City', wrong: ['Monaco', 'San Marino', 'Liechtenstein'] },
-        { q: 'Mount Everest is located in which mountain range?', a: 'Himalayas', wrong: ['Andes', 'Alps', 'Rockies'] },
-        { q: 'What desert covers much of northern Africa?', a: 'Sahara', wrong: ['Gobi', 'Kalahari', 'Mojave'] },
-        { q: 'Which country is also a continent?', a: 'Australia', wrong: ['Russia', 'Canada', 'Brazil'] },
-        { q: 'What is the capital of France?', a: 'Paris', wrong: ['London', 'Rome', 'Berlin'] }
+        { q: 'What is the largest continent?', a: 'Asia', wrong: ['Africa', 'North America', 'Europe'], explain: 'Asia covers about 44.5 million km² — roughly 30% of Earth\'s total land area — and is home to about 60% of the world\'s population.' },
+        { q: 'What is the longest river in the world?', a: 'Nile', wrong: ['Amazon', 'Yangtze', 'Mississippi'], explain: 'The Nile stretches about 6,650 km through northeastern Africa; the Amazon is close and carries far more water, making the ranking sometimes debated.' },
+        { q: 'Which ocean is the largest?', a: 'Pacific Ocean', wrong: ['Atlantic Ocean', 'Indian Ocean', 'Arctic Ocean'], explain: 'The Pacific Ocean covers over 165 million km² — larger than all of Earth\'s landmasses combined — and contains the Mariana Trench, the deepest point on Earth.' },
+        { q: 'What is the capital of Japan?', a: 'Tokyo', wrong: ['Beijing', 'Seoul', 'Bangkok'], explain: 'Tokyo became Japan\'s capital in 1869; with ~37 million people in its metro area, it is the most populous metropolitan area in the world.' },
+        { q: 'Which country has the most population?', a: 'India', wrong: ['China', 'USA', 'Indonesia'], explain: 'India surpassed China in 2023 to become the world\'s most populous country, with over 1.4 billion people.' },
+        { q: 'What is the smallest country in the world?', a: 'Vatican City', wrong: ['Monaco', 'San Marino', 'Liechtenstein'], explain: 'Vatican City covers just 0.44 km² inside Rome; it\'s the headquarters of the Catholic Church and has a population of about 800 people.' },
+        { q: 'Mount Everest is located in which mountain range?', a: 'Himalayas', wrong: ['Andes', 'Alps', 'Rockies'], explain: 'The Himalayas span five countries; Mount Everest at 8,848.86 m is the highest peak and sits on the Nepal-Tibet border.' },
+        { q: 'What desert covers much of northern Africa?', a: 'Sahara', wrong: ['Gobi', 'Kalahari', 'Mojave'], explain: 'The Sahara is the world\'s largest hot desert at ~9.2 million km²; despite its heat, it experiences cold nights and even occasional snowfall.' },
+        { q: 'Which country is also a continent?', a: 'Australia', wrong: ['Russia', 'Canada', 'Brazil'], explain: 'Australia is both the world\'s sixth-largest country and the smallest continent; it\'s the only country to occupy an entire continent.' },
+        { q: 'What is the capital of France?', a: 'Paris', wrong: ['London', 'Rome', 'Berlin'], explain: 'Paris has been France\'s capital for centuries; it\'s home to the Eiffel Tower, the Louvre, and receives ~100 million visitors per year.' }
       ]
     },
     coding: {
       name: '💻 Coding Basics', desc: 'Programming concepts & web dev', questions: [
-        { q: 'What does HTML stand for?', a: 'HyperText Markup Language', wrong: ['HighText Machine Language', 'HyperLoop Machine Language', 'HyperText Markup Level'] },
-        { q: 'Which language is used for styling web pages?', a: 'CSS', wrong: ['HTML', 'JavaScript', 'Python'] },
-        { q: 'What symbol is used for single-line comments in JS?', a: '//', wrong: ['/*', '#', '<!--'] },
-        { q: 'What does API stand for?', a: 'Application Programming Interface', wrong: ['Applied Programming Interface', 'Application Process Integration', 'Automated Program Interface'] },
-        { q: 'Which is NOT a JavaScript data type?', a: 'Float', wrong: ['String', 'Boolean', 'Undefined'] },
-        { q: 'What keyword declares a constant variable in JS?', a: 'const', wrong: ['let', 'var', 'constant'] },
-        { q: 'What does CSS stand for?', a: 'Cascading Style Sheets', wrong: ['Computer Style Sheets', 'Creative Style System', 'Colorful Style Sheets'] },
-        { q: 'Which HTML tag is used for the largest heading?', a: '<h1>', wrong: ['<heading>', '<h6>', '<head>'] },
-        { q: 'What is the output of 2 + "2" in JS?', a: '"22"', wrong: ['4', 'NaN', 'Error'] },
-        { q: 'Which of these is a version control system?', a: 'Git', wrong: ['Node', 'React', 'Docker'] }
+        { q: 'What does HTML stand for?', a: 'HyperText Markup Language', wrong: ['HighText Machine Language', 'HyperLoop Machine Language', 'HyperText Markup Level'], explain: 'HTML uses tags to structure web content; "HyperText" refers to links that connect documents, which is the foundation of the World Wide Web.' },
+        { q: 'Which language is used for styling web pages?', a: 'CSS', wrong: ['HTML', 'JavaScript', 'Python'], explain: 'CSS (Cascading Style Sheets) controls visual presentation — colors, fonts, layout; HTML provides structure, and JS adds interactivity.' },
+        { q: 'What symbol is used for single-line comments in JS?', a: '//', wrong: ['/*', '#', '<!--'], explain: '// starts a single-line comment in JavaScript; /* */ spans multiple lines; # is used in Python/Ruby; <!-- --> is HTML comment syntax.' },
+        { q: 'What does API stand for?', a: 'Application Programming Interface', wrong: ['Applied Programming Interface', 'Application Process Integration', 'Automated Program Interface'], explain: 'An API defines how software components communicate; it lets your app request data or functionality from another service without knowing its internals.' },
+        { q: 'Which is NOT a JavaScript data type?', a: 'Float', wrong: ['String', 'Boolean', 'Undefined'], explain: 'JavaScript has one number type for both integers and decimals; "Float" is a type in languages like C and Java, but not in JS.' },
+        { q: 'What keyword declares a constant variable in JS?', a: 'const', wrong: ['let', 'var', 'constant'], explain: 'const declares a variable whose binding cannot be reassigned; let allows reassignment with block scope; var is older with function scope.' },
+        { q: 'What does CSS stand for?', a: 'Cascading Style Sheets', wrong: ['Computer Style Sheets', 'Creative Style System', 'Colorful Style Sheets'], explain: '"Cascading" means styles apply in a priority order (specificity + source order), allowing defaults to be overridden at multiple levels.' },
+        { q: 'Which HTML tag is used for the largest heading?', a: '<h1>', wrong: ['<heading>', '<h6>', '<head>'], explain: 'HTML has six heading levels h1–h6; h1 is the largest/most important and should appear once per page for SEO and accessibility.' },
+        { q: 'What is the output of 2 + "2" in JS?', a: '"22"', wrong: ['4', 'NaN', 'Error'], explain: 'JS uses type coercion: when + is used with a string, the number 2 is converted to the string "2", then concatenated to get "22".' },
+        { q: 'Which of these is a version control system?', a: 'Git', wrong: ['Node', 'React', 'Docker'], explain: 'Git tracks changes to files over time and enables collaboration; Node.js is a JS runtime, React is a UI library, and Docker is for containers.' }
       ]
     }
   };
@@ -1027,12 +1029,30 @@ export function initGameLogic() {
     }
     const stats = document.getElementById('go-stats');
     if (stats) {
-      const acc = G.qAns > 0 ? Math.round((G.qOk / G.qAns) * 100) : 0;
+      const acc = G.qAns > 0 ? G.qOk / G.qAns : 0;
+      const accPct = Math.round(acc * 100);
+
+      // Star rating: based on win + accuracy
+      let stars = 0;
+      if (win) {
+        if (acc >= 0.8) stars = 3;
+        else if (acc >= 0.55) stars = 2;
+        else stars = 1;
+      } else {
+        if (G.wave >= 8 && acc >= 0.5) stars = 2;
+        else if (G.wave >= 3) stars = 1;
+      }
+
+      const starHtml = [1, 2, 3].map(s =>
+        `<span class="star-icon ${s <= stars ? 'star-lit' : 'star-dim'}">${s <= stars ? '★' : '☆'}</span>`
+      ).join('');
+
       stats.innerHTML = `
+        <div class="star-row">${starHtml}</div>
         <div class="gs"><div class="gsv">${G.wave}</div><div class="gsl">WAVES</div></div>
         <div class="gs"><div class="gsv">${G.kills}</div><div class="gsl">KILLS</div></div>
         <div class="gs"><div class="gsv text-amber-400">${G.totalGoldEarned}</div><div class="gsl">GOLD EARNED</div></div>
-        <div class="gs"><div class="gsv text-cyan-400">${acc}%</div><div class="gsl">ACCURACY</div></div>
+        <div class="gs"><div class="gsv text-cyan-400">${accPct}%</div><div class="gsl">ACCURACY</div></div>
         <div class="gs"><div class="gsv text-orange-400">${G.bestStreak}</div><div class="gsl">BEST STREAK</div></div>
       `;
     }
@@ -1134,20 +1154,24 @@ export function initGameLogic() {
 
     var allBtns = document.querySelectorAll('#agrid .ab');
     allBtns.forEach(function (b: any) { b.disabled = true; b.style.pointerEvents = 'none' });
+    const explainHtml = q.explain ? `<div class="explain-text">💡 ${esc(q.explain)}</div>` : '';
+    const closeDelay = q.explain ? 3200 : 1500;
+
     if (ok) {
       G.streak++; G.qOk++; G.gold += 30; G.totalGoldEarned += 30; sfxOk(G.streak);
       if (G.streak > G.bestStreak) G.bestStreak = G.streak;
-      const qres = document.getElementById('qres'); if (qres) { qres.className = 'qrs good'; qres.textContent = '✅ Correct! +30💰'; }
+      const qres = document.getElementById('qres');
+      if (qres) { qres.className = 'qrs good'; qres.innerHTML = '✅ Correct! +30💰' + explainHtml; }
     } else {
       sfxNo(); G.streak = 0;
       G.missedThisRound.push({ q: q.q, a: q.a });
-      const qres = document.getElementById('qres'); if (qres) { qres.className = 'qrs bad'; qres.textContent = '❌ The answer was: ' + q.a; }
+      const qres = document.getElementById('qres');
+      if (qres) { qres.className = 'qrs bad'; qres.innerHTML = '❌ The answer was: ' + esc(q.a) + explainHtml; }
     }
     updateHUD();
     setTimeout(function () {
-      const qov = document.getElementById('qov'); if (qov) qov.classList.add('active');
-      document.getElementById('qov')?.classList.remove('active'); G.qOpen = false
-    }, 1500);
+      document.getElementById('qov')?.classList.remove('active'); G.qOpen = false;
+    }, closeDelay);
   }
 
   function timeoutQ(qi: number, q: any) {
@@ -1163,8 +1187,11 @@ export function initGameLogic() {
     });
     G.missedThisRound.push({ q: q.q, a: q.a });
 
-    const qres = document.getElementById('qres'); if (qres) { qres.className = 'qrs bad'; qres.textContent = "⏰ Time's up! Answer: " + questions[qi].a; }
-    setTimeout(function () { document.getElementById('qov')?.classList.remove('active'); G.qOpen = false }, 1600);
+    const tq = questions[qi];
+    const explainHtml = tq.explain ? `<div class="explain-text">💡 ${esc(tq.explain)}</div>` : '';
+    const qres = document.getElementById('qres');
+    if (qres) { qres.className = 'qrs bad'; qres.innerHTML = "⏰ Time's up! Answer: " + esc(tq.a) + explainHtml; }
+    setTimeout(function () { document.getElementById('qov')?.classList.remove('active'); G.qOpen = false }, tq.explain ? 3200 : 1600);
   }
 
   // --- Expose functions to window for HTML buttons ---
@@ -1432,6 +1459,83 @@ export function initGameLogic() {
         break;
     }
     updateTowerPanel();
+  };
+
+  // --- AI Question Generation ---
+  (window as any).generateAIQuiz = async () => {
+    const topicInput = document.getElementById('ai-topic-input') as HTMLInputElement;
+    const gradeSelect = document.getElementById('ai-grade-select') as HTMLSelectElement;
+    const countSelect = document.getElementById('ai-count-select') as HTMLSelectElement;
+    const statusEl = document.getElementById('ai-status');
+    const previewEl = document.getElementById('ai-preview');
+    const playBtn = document.getElementById('ai-play-btn') as HTMLButtonElement;
+
+    const topic = topicInput?.value?.trim();
+    const grade = gradeSelect?.value || 'Middle School';
+    const count = parseInt(countSelect?.value || '10');
+
+    if (!topic) {
+      if (statusEl) statusEl.innerHTML = '<span style="color:#f97316">⚠️ Please enter a topic first</span>';
+      return;
+    }
+
+    const apiKey = (process.env as any).GEMINI_API_KEY;
+    if (!apiKey) {
+      if (statusEl) statusEl.innerHTML = '<span style="color:#ef4444">⚠️ GEMINI_API_KEY not set — add it to your .env file</span>';
+      return;
+    }
+
+    if (statusEl) statusEl.innerHTML = '<span style="color:#06b6d4">✨ Generating questions with AI…</span>';
+    if (playBtn) playBtn.style.display = 'none';
+    if (previewEl) previewEl.innerHTML = '';
+
+    try {
+      const ai = new GoogleGenAI({ apiKey });
+      const prompt = `Create exactly ${count} multiple choice quiz questions about "${topic}" for ${grade} level students.
+
+Return ONLY a valid JSON array with no markdown fences, no explanation text:
+[{"q":"Question?","a":"Correct Answer","wrong":["Wrong1","Wrong2","Wrong3"],"explain":"One sentence explaining why the correct answer is right."}]
+
+Rules:
+- Questions must be factually accurate
+- Each question has exactly 3 wrong answers that are plausible but clearly incorrect
+- Explanations are one sentence, educational, and memorable
+- Difficulty is appropriate for ${grade} level`;
+
+      const response = await ai.models.generateContent({
+        model: 'gemini-2.0-flash',
+        contents: prompt
+      });
+
+      const text = response.text || '';
+      const jsonMatch = text.match(/\[[\s\S]*\]/);
+      if (!jsonMatch) throw new Error('Could not parse a JSON array from the response');
+
+      const parsed = JSON.parse(jsonMatch[0]);
+      if (!Array.isArray(parsed) || parsed.length === 0) throw new Error('No questions were generated');
+
+      (window as any)._aiGeneratedQuestions = parsed;
+
+      if (statusEl) statusEl.innerHTML = `<span style="color:#22c55e">✅ Generated ${parsed.length} questions about "${esc(topic)}"</span>`;
+
+      if (previewEl) {
+        previewEl.innerHTML = parsed.slice(0, 3).map((q: any, i: number) => `
+          <div style="background:rgba(15,23,42,0.9);border:1px solid rgba(51,65,85,0.8);border-radius:8px;padding:10px;margin-bottom:6px;">
+            <div style="color:#e2e8f0;font-size:12px;font-weight:600;">${i + 1}. ${esc(q.q)}</div>
+            <div style="color:#4ade80;font-size:11px;margin-top:3px;">✓ ${esc(q.a)}</div>
+          </div>
+        `).join('') + (parsed.length > 3 ? `<div style="color:#475569;font-size:11px;text-align:center;padding:4px;">+ ${parsed.length - 3} more questions…</div>` : '');
+      }
+
+      if (playBtn) playBtn.style.display = 'block';
+    } catch (err: any) {
+      if (statusEl) statusEl.innerHTML = `<span style="color:#ef4444">❌ ${esc(String(err?.message || err))}</span>`;
+    }
+  };
+
+  (window as any).playAIQuiz = () => {
+    const qs = (window as any)._aiGeneratedQuestions;
+    if (qs?.length) initGame('Player', qs, false);
   };
 
   // Initial UI setup
