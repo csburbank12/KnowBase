@@ -607,7 +607,8 @@ export function initGameLogic() {
     var s = document.getElementById('tshop'); if (!s) return; s.innerHTML = '';
     TDEFS.forEach(function (t) {
       var d = document.createElement('div'); d.className = 'tc'; d.id = 'tc-' + t.id;
-      d.innerHTML = '<div class="tk">' + t.key + '</div><div class="ti">' + t.icon + '</div><div class="tn">' + t.name + '</div><div class="tp">💰' + t.cost + '</div><div class="td">' + t.desc + '</div>';
+      (d as HTMLElement).style.setProperty('--tc', t.color);
+      d.innerHTML = '<div class="tc-accent"></div><div class="tk">' + t.key + '</div><div class="ti">' + t.icon + '</div><div class="tn">' + t.name + '</div><div class="tp">💰' + t.cost + '</div><div class="td">' + t.desc + '</div>';
       d.addEventListener('click', function () { selTower(t.id) });
       s.appendChild(d);
     });
@@ -887,34 +888,80 @@ export function initGameLogic() {
     ctx.save();
     if (G.shakeT > 0) ctx.translate((Math.random() - .5) * G.shakeM * 2, (Math.random() - .5) * G.shakeM * 2);
     
-    // Draw Grass Background
-    ctx.fillStyle = '#064e3b'; // Dark green grass
+    // Grass background with subtle gradient
+    var bgGrad = ctx.createLinearGradient(0, 0, CW, CH);
+    bgGrad.addColorStop(0, '#073d2e');
+    bgGrad.addColorStop(1, '#042d20');
+    ctx.fillStyle = bgGrad;
     ctx.fillRect(0, 0, CW, CH);
-    
-    // Draw subtle grid
-    ctx.strokeStyle = 'rgba(255,255,255,0.05)'; 
+
+    // Subtle grid
+    ctx.strokeStyle = 'rgba(255,255,255,0.04)';
     ctx.lineWidth = 1;
     for (var gx = 0; gx <= COLS; gx++) { ctx.beginPath(); ctx.moveTo(gx * cellW, 0); ctx.lineTo(gx * cellW, CH); ctx.stroke() }
     for (var gy = 0; gy <= ROWS; gy++) { ctx.beginPath(); ctx.moveTo(0, gy * cellH); ctx.lineTo(CW, gy * cellH); ctx.stroke() }
-    
-    // Draw Path (Dirt/Stone)
+
+    // Tower placement hover indicator
+    if (hoverCell && G.selTower && !G.pathSet[hoverCell.x + ',' + hoverCell.y] &&
+        !(hoverCell.x === G.base.x && hoverCell.y === G.base.y)) {
+      ctx.fillStyle = 'rgba(251,191,36,0.10)';
+      ctx.fillRect(hoverCell.x * cellW + 1, hoverCell.y * cellH + 1, cellW - 2, cellH - 2);
+      ctx.strokeStyle = 'rgba(251,191,36,0.55)';
+      ctx.lineWidth = 2;
+      ctx.setLineDash([4, 3]);
+      ctx.strokeRect(hoverCell.x * cellW + 2, hoverCell.y * cellH + 2, cellW - 4, cellH - 4);
+      ctx.setLineDash([]);
+    }
+
+    // Path (stone tiles)
     G.path.forEach(function (p: any, pi: number) {
-      var pct = pi / G.path.length;
-      
-      // Base dirt
-      ctx.fillStyle = '#78350f'; 
-      ctx.fillRect(p.x * cellW, p.y * cellH, cellW, cellH);
-      
-      // Path texture/highlight
-      ctx.fillStyle = 'rgba(251,191,36,' + (0.1 + pct * 0.1) + ')'; 
-      ctx.fillRect(p.x * cellW + 2, p.y * cellH + 2, cellW - 4, cellH - 4);
+      var px = p.x * cellW, py = p.y * cellH;
+      // Stone shadow
+      ctx.fillStyle = '#2d1a0e';
+      ctx.fillRect(px, py, cellW, cellH);
+      // Stone surface
+      ctx.fillStyle = '#7c4a2f';
+      ctx.fillRect(px + 1, py + 1, cellW - 2, cellH - 2);
+      // Center lighter panel
+      ctx.fillStyle = '#9a6040';
+      ctx.fillRect(px + 3, py + 3, cellW - 6, cellH - 6);
+      // Top-left highlight
+      ctx.fillStyle = 'rgba(255,255,255,0.08)';
+      ctx.fillRect(px + 3, py + 3, cellW - 6, 2);
+      ctx.fillRect(px + 3, py + 3, 2, cellH - 6);
+      // Arrow directional tint near end
+      if (pi > G.path.length * 0.75) {
+        ctx.fillStyle = 'rgba(239,68,68,0.12)';
+        ctx.fillRect(px + 1, py + 1, cellW - 2, cellH - 2);
+      }
     });
 
-    // Draw Castle Base
-    ctx.fillStyle = '#1e293b'; // Slate 800
-    ctx.fillRect(G.base.x * cellW, G.base.y * cellH, cellW, cellH);
-    ctx.fillStyle = '#334155'; // Slate 700
-    ctx.fillRect(G.base.x * cellW + 4, G.base.y * cellH + 4, cellW - 8, cellH - 8);
+    // Castle (draw a mini fortress shape)
+    var bx = G.base.x * cellW, by = G.base.y * cellH;
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(bx, by, cellW, cellH);
+    ctx.fillStyle = '#1e3a5f';
+    ctx.fillRect(bx + 2, by + 2, cellW - 4, cellH - 4);
+    ctx.fillStyle = '#2563eb';
+    ctx.fillRect(bx + 4, by + cellH * 0.4, cellW - 8, cellH * 0.6 - 4);
+    // Battlements
+    var btw = Math.floor((cellW - 8) / 3);
+    ctx.fillStyle = '#1e3a5f';
+    for (var bi = 0; bi < 3; bi++) {
+      ctx.fillRect(bx + 4 + bi * btw + 1, by + 2, btw - 2, cellH * 0.35);
+    }
+    // Gate arch
+    ctx.fillStyle = '#0f172a';
+    ctx.fillRect(bx + cellW / 2 - 4, by + cellH * 0.55, 8, cellH * 0.45 - 4);
+    ctx.strokeStyle = '#fbbf24';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(bx + cellW / 2 - 4, by + cellH * 0.55, 8, cellH * 0.45 - 4);
+    // Castle emoji on top
+    ctx.font = Math.floor(cellH * 0.55) + 'px serif';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.shadowBlur = 12; ctx.shadowColor = '#2563eb';
+    ctx.fillText('🏰', bx + cellW / 2, by + cellH / 2);
+    ctx.shadowBlur = 0;
 
     G.towers.forEach(function (t: any) {
       var tx = (t.x + .5) * cellW, ty = (t.y + .5) * cellH;
@@ -1021,7 +1068,7 @@ export function initGameLogic() {
   function endGame(win: boolean) {
     G.over = true;
     const goov = document.getElementById('goov');
-    if (goov) goov.classList.add('active');
+    if (goov) { goov.classList.add('active'); goov.classList.add(win ? 'gov-win' : 'gov-lose'); }
     const got = document.getElementById('got');
     if (got) {
       got.textContent = win ? '🏆 VICTORY!' : '💀 FORTRESS FALLEN';
@@ -1126,7 +1173,9 @@ export function initGameLogic() {
 
     var grid = document.getElementById('agrid'); if (!grid) return; grid.innerHTML = '';
     ans.forEach(function (a, i) {
-      var b = document.createElement('button'); b.className = 'ab'; b.textContent = lbl[i] + '. ' + a;
+      var b = document.createElement('button'); b.className = 'ab';
+      b.innerHTML = '<span class="ab-lbl">' + lbl[i] + '</span><span class="ab-txt">' + esc(a) + '</span>';
+      (b as any).dataset.answer = a;
       b.addEventListener('click', function () { handleAns(b, a === q.a, q, qi, a) });
       grid!.appendChild(b)
     });
@@ -1153,7 +1202,11 @@ export function initGameLogic() {
     });
 
     var allBtns = document.querySelectorAll('#agrid .ab');
-    allBtns.forEach(function (b: any) { b.disabled = true; b.style.pointerEvents = 'none' });
+    allBtns.forEach(function (b: any) {
+      b.disabled = true; b.style.pointerEvents = 'none';
+      if (b.dataset.answer === q.a) b.classList.add('correct');
+      else if (b.dataset.answer === givenAns && !ok) b.classList.add('wrong');
+    });
     const explainHtml = q.explain ? `<div class="explain-text">💡 ${esc(q.explain)}</div>` : '';
     const closeDelay = q.explain ? 3200 : 1500;
 
@@ -1188,6 +1241,10 @@ export function initGameLogic() {
     G.missedThisRound.push({ q: q.q, a: q.a });
 
     const tq = questions[qi];
+    document.querySelectorAll('#agrid .ab').forEach(function(b: any) {
+      b.disabled = true; b.style.pointerEvents = 'none';
+      if (b.dataset.answer === tq.a) b.classList.add('correct');
+    });
     const explainHtml = tq.explain ? `<div class="explain-text">💡 ${esc(tq.explain)}</div>` : '';
     const qres = document.getElementById('qres');
     if (qres) { qres.className = 'qrs bad'; qres.innerHTML = "⏰ Time's up! Answer: " + esc(tq.a) + explainHtml; }
